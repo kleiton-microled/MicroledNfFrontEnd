@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.nfse-sidebar {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.nav-link {
+  color: #4b5563;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #0d6efd;
+  color: #fff;
+}

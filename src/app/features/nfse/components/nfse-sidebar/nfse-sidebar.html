@@ -1,0 +1,22 @@
+<aside class="nfse-sidebar card border-0 shadow-sm">
+  <div class="card-body p-3 p-lg-4">
+    <div class="mb-4">
+      <p class="text-uppercase text-secondary small fw-semibold mb-2">Modulo</p>
+      <h2 class="h4 mb-1">NFSe</h2>
+      <p class="text-secondary small mb-0">Navegacao interna da feature.</p>
+    </div>
+
+    <nav class="nav flex-column gap-2">
+      @for (item of navigationItems; track item.route) {
+        <a
+          class="nav-link px-3 py-2 rounded-3"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+  </div>
+</aside>

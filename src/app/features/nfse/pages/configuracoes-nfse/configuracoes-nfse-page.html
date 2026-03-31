@@ -1,0 +1,202 @@
+<section class="d-flex flex-column gap-4">
+  <header class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+    <div>
+      <span class="badge rounded-pill text-bg-primary mb-3">Configuracoes NFSe</span>
+      <h1 class="h2 mb-2">Parametros da empresa e certificado</h1>
+      <p class="text-secondary mb-0">
+        Selecione um certificado disponivel na maquina para preencher os dados base da operacao.
+      </p>
+    </div>
+
+    <div class="d-flex align-items-start">
+      <button type="button" class="btn btn-outline-primary" (click)="facade.openCertificateModal()">
+        Selecionar certificado
+      </button>
+    </div>
+  </header>
+
+  @if (facade.certificatesErrorMessage() && !facade.isCertificateModalOpen()) {
+    <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3">
+      <span>{{ facade.certificatesErrorMessage() }}</span>
+      <button type="button" class="btn btn-sm btn-outline-warning" (click)="facade.loadCertificates()">
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-12 col-xl-8">
+      <form [formGroup]="configurationForm" class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-xl-5">
+          <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <h2 class="h4 mb-1">Dados principais</h2>
+              <p class="text-secondary mb-0">
+                Informacoes que serao utilizadas nas consultas, emissao e demais operacoes do modulo.
+              </p>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-8">
+              <label class="form-label" for="empresaNome">Empresa</label>
+              <input id="empresaNome" type="text" class="form-control" formControlName="empresaNome" />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ambiente">Ambiente</label>
+              <select id="ambiente" class="form-select" formControlName="ambiente">
+                <option value="producao">Producao</option>
+                <option value="homologacao">Homologacao</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="cnpj">CNPJ</label>
+              <input id="cnpj" type="text" class="form-control" formControlName="cnpj" />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="cpf">CPF</label>
+              <input id="cpf" type="text" class="form-control" formControlName="cpf" />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="inscricaoMunicipal">Inscricao municipal</label>
+              <input
+                id="inscricaoMunicipal"
+                type="text"
+                class="form-control"
+                formControlName="inscricaoMunicipal"
+              />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <h2 class="h4 mb-1">Certificado selecionado</h2>
+              <p class="text-secondary mb-0">
+                Dados preenchidos automaticamente a partir do certificado escolhido.
+              </p>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" for="certificadoNome">Nome do certificado</label>
+              <input
+                id="certificadoNome"
+                type="text"
+                class="form-control"
+                formControlName="certificadoNome"
+              />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="thumbprint">Thumbprint</label>
+              <input id="thumbprint" type="text" class="form-control" formControlName="thumbprint" />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="emissorCertificado">Emissor</label>
+              <input
+                id="emissorCertificado"
+                type="text"
+                class="form-control"
+                formControlName="emissorCertificado"
+              />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="serialNumber">Serial number</label>
+              <input id="serialNumber" type="text" class="form-control" formControlName="serialNumber" />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="storeLocation">Store location</label>
+              <input id="storeLocation" type="text" class="form-control" formControlName="storeLocation" />
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="storeName">Store name</label>
+              <input id="storeName" type="text" class="form-control" formControlName="storeName" />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="validadeInicial">Validade inicial</label>
+              <input
+                id="validadeInicial"
+                type="text"
+                class="form-control"
+                formControlName="validadeInicial"
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="validadeFinal">Validade final</label>
+              <input id="validadeFinal" type="text" class="form-control" formControlName="validadeFinal" />
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">Resumo da configuracao</h2>
+
+          @if (facade.selectedCertificate(); as selectedCertificate) {
+            <div class="d-flex flex-column gap-3">
+              <div class="summary-item">
+                <div class="small text-secondary">Certificado</div>
+                <div class="fw-semibold">{{ selectedCertificate.simpleName }}</div>
+              </div>
+
+              <div class="summary-item">
+                <div class="small text-secondary">Documento</div>
+                <div>{{ selectedCertificate.cnpj || selectedCertificate.cpf || 'Nao informado' }}</div>
+              </div>
+
+              <div class="summary-item">
+                <div class="small text-secondary">Validade</div>
+                <div>{{ selectedCertificate.notAfter | date: 'dd/MM/yyyy HH:mm' }}</div>
+              </div>
+
+              <div class="summary-item">
+                <div class="small text-secondary">Chave privada</div>
+                <div>{{ selectedCertificate.hasPrivateKey ? 'Disponivel' : 'Nao disponivel' }}</div>
+              </div>
+
+              <div class="summary-item">
+                <div class="small text-secondary">A3 candidato</div>
+                <div>{{ selectedCertificate.isA3Candidate ? 'Sim' : 'Nao' }}</div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state text-center py-5">
+              <h3 class="h5">Nenhum certificado selecionado</h3>
+              <p class="text-secondary mb-0">
+                Abra a modal para escolher o certificado que sera usado pelo modulo NFSe.
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (facade.isCertificateModalOpen()) {
+    <app-certificate-selector-modal
+      [certificates]="facade.certificates()"
+      [loading]="facade.loadingCertificates()"
+      [errorMessage]="facade.certificatesErrorMessage()"
+      [selectedThumbprint]="facade.selectedCertificate()?.thumbprint ?? null"
+      (close)="facade.closeCertificateModal()"
+      (refresh)="facade.loadCertificates()"
+      (choose)="handleCertificateSelection($event)"
+    />
+  }
+</section>

@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.detail-panel {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.detail-item {
+  padding: 0.75rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.empty-panel {
+  border: 1px dashed #ced4da;
+  border-radius: 0.75rem;
+  background-color: #f8f9fa;
+}

@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+
+.content-panel {
+  min-height: calc(100dvh - 4rem);
+  background:
+    linear-gradient(180deg, rgba(13, 110, 253, 0.03), transparent 180px),
+    #fff;
+}

@@ -1,0 +1,81 @@
+<div class="modal-backdrop-custom" (click)="close.emit()"></div>
+
+<div class="modal-shell" role="dialog" aria-modal="true" aria-labelledby="certificate-modal-title">
+  <div class="card border-0 shadow-lg modal-card">
+    <div class="card-body p-4 p-lg-5">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <p class="text-uppercase text-secondary small fw-semibold mb-2">Certificados</p>
+          <h2 id="certificate-modal-title" class="h3 mb-1">Selecione um certificado</h2>
+          <p class="text-secondary mb-0">
+            Escolha o certificado que sera utilizado pela operacao da NFSe.
+          </p>
+        </div>
+
+        <button type="button" class="btn btn-outline-secondary" (click)="close.emit()">Fechar</button>
+      </div>
+
+      @if (loading()) {
+        <div class="d-flex flex-column gap-3">
+          <div class="placeholder-glow"><span class="placeholder col-12 placeholder-lg"></span></div>
+          <div class="placeholder-glow"><span class="placeholder col-10"></span></div>
+          <div class="placeholder-glow"><span class="placeholder col-12"></span></div>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3 mb-0">
+          <span>{{ errorMessage() }}</span>
+          <button type="button" class="btn btn-sm btn-outline-warning" (click)="refresh.emit()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (certificates().length === 0) {
+        <div class="empty-state text-center py-5">
+          <h3 class="h5">Nenhum certificado encontrado</h3>
+          <p class="text-secondary mb-3">
+            Verifique a configuracao local e tente atualizar a lista de certificados.
+          </p>
+          <button type="button" class="btn btn-outline-primary" (click)="refresh.emit()">
+            Atualizar lista
+          </button>
+        </div>
+      } @else {
+        <div class="d-flex flex-column gap-3 certificates-list">
+          @for (certificate of certificates(); track certificate.thumbprint) {
+            <button
+              type="button"
+              class="certificate-item text-start"
+              [class.active]="selectedThumbprint() === certificate.thumbprint"
+              (click)="choose.emit(certificate)"
+            >
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="fw-semibold">{{ certificate.simpleName }}</div>
+                  <div class="text-secondary small mt-1">{{ certificate.subject }}</div>
+                </div>
+
+                @if (certificate.isCurrentlySelected) {
+                  <span class="badge text-bg-success">Atual</span>
+                }
+              </div>
+
+              <div class="row g-3 mt-1 small">
+                <div class="col-md-6">
+                  <div class="text-secondary">Thumbprint</div>
+                  <div class="text-break">{{ certificate.thumbprint }}</div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-secondary">CNPJ/CPF</div>
+                  <div>{{ certificate.cnpj || certificate.cpf || '-' }}</div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-secondary">Validade</div>
+                  <div>{{ certificate.notAfter | date: 'dd/MM/yyyy' }}</div>
+                </div>
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

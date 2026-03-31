@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1040;
+}
+
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.modal-card {
+  width: min(960px, 100%);
+  max-height: min(85vh, 960px);
+  overflow: hidden;
+}
+
+.certificates-list {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.certificate-item {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 1rem;
+  background-color: #fff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.certificate-item:hover,
+.certificate-item.active {
+  border-color: #0d6efd;
+  box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.12);
+  transform: translateY(-1px);
+}
+
+.empty-state {
+  border: 1px dashed #ced4da;
+  border-radius: 1rem;
+  background-color: #f8f9fa;
+}
