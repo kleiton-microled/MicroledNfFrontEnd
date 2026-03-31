@@ -13,8 +13,10 @@ import { CertificateResponse } from '../../../../data-access/models/nfse-api.mod
 export class CertificateSelectorModalComponent {
   readonly certificates = input<CertificateResponse[]>([]);
   readonly loading = input(false);
+  readonly selecting = input(false);
   readonly errorMessage = input<string | null>(null);
   readonly selectedThumbprint = input<string | null>(null);
+  readonly selectingThumbprint = input<string | null>(null);
 
   readonly close = output<void>();
   readonly refresh = output<void>();

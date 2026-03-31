@@ -22,9 +22,11 @@ import {
   NfseResumoResponse,
   OperacaoNfseResponse,
   QueryParamValue,
+  SelectCertificatePayload,
 } from '../models/nfse-api.models';
 import {
   CERTIFICATES_API_URL,
+  CERTIFICATES_SELECT_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   NFSE_API_BASE_URL,
 } from '../tokens/nfse-api-base-url.token';
@@ -36,6 +38,7 @@ export class NfseApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(NFSE_API_BASE_URL);
   private readonly certificatesApiUrl = inject(CERTIFICATES_API_URL);
+  private readonly certificatesSelectApiUrl = inject(CERTIFICATES_SELECT_API_URL);
   private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
@@ -108,6 +111,12 @@ export class NfseApiService {
     return this.http
       .get<CertificateResponse[]>(this.certificatesApiUrl)
       .pipe(catchError((error) => this.handleError('consulta de certificados disponiveis', error)));
+  }
+
+  selecionarCertificado(payload: SelectCertificatePayload): Observable<void> {
+    return this.http
+      .post<void>(this.certificatesSelectApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('selecao do certificado', error)));
   }
 
   consultarNotaFiscal(payload: ConsultarNotaFiscalRequest): Observable<ConsultarNotaFiscalResponse> {

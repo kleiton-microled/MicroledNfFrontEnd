@@ -110,6 +110,12 @@ export interface CertificateResponse {
   isCurrentlySelected: boolean;
 }
 
+export interface SelectCertificatePayload {
+  thumbprint: string;
+  storeLocation: string;
+  storeName: string;
+}
+
 export interface ChaveNfeRequest {
   inscricaoPrestador: number;
   numeroNFe: number;

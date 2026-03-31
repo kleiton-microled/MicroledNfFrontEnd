@@ -192,8 +192,10 @@
     <app-certificate-selector-modal
       [certificates]="facade.certificates()"
       [loading]="facade.loadingCertificates()"
+      [selecting]="facade.selectingCertificate()"
       [errorMessage]="facade.certificatesErrorMessage()"
       [selectedThumbprint]="facade.selectedCertificate()?.thumbprint ?? null"
+      [selectingThumbprint]="facade.selectingThumbprint()"
       (close)="facade.closeCertificateModal()"
       (refresh)="facade.loadCertificates()"
       (choose)="handleCertificateSelection($event)"
