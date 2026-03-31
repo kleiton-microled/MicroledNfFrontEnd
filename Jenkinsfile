@@ -6,7 +6,7 @@ pipeline {
         VPS_HOST = "147.93.15.250"
         VPS_USER = "amktech"
         VPS_FRONT_DIR = "/var/www/amktechsistemas/front"
-        FRONT_BUILD_DIR = "dist/browser"
+        FRONT_BUILD_DIR = "dist/microled-nf-front-end/browser"
     }
 
     stages {
