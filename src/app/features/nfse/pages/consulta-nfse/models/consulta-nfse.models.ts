@@ -1,21 +1,23 @@
-import { NfseDetalheResponse, NfseResumoResponse } from '../../../data-access/models/nfse-api.models';
+import {
+  ConsultarNotaFiscalRequest,
+  ConsultarNotaFiscalResponse,
+} from '../../../data-access/models/nfse-api.models';
 
 export interface ConsultaNfseFiltersFormValue {
-  numeroNfse: string;
-  numeroRps: string;
-  dataInicial: string;
-  dataFinal: string;
-  documentoTomador: string;
+  inscricaoPrestador: string;
+  numeroNFe: string;
+  codigoVerificacao: string;
+  chaveNotaNacional: string;
 }
 
 export interface ConsultaNfseResultadoItem {
-  numeroNfse: string;
-  numeroRps?: string;
-  serieRps?: string;
+  numeroNFe: string;
+  inscricaoPrestador: string;
+  codigoVerificacao: string;
+  chaveNotaNacional?: string;
   dataEmissao?: string;
-  documentoTomador?: string;
-  codigoVerificacao?: string;
   status?: string;
+  valorTotal?: number;
   valorServicos?: number;
   valorLiquido?: number;
 }
@@ -23,27 +25,78 @@ export interface ConsultaNfseResultadoItem {
 export interface ConsultaNfseSearchState {
   items: ConsultaNfseResultadoItem[];
   total: number;
-  autoSelectedDetail?: NfseDetalheResponse;
+  autoSelectedDetail?: ConsultarNotaFiscalResponse;
 }
 
-export function mapResumoToResultadoItem(
-  response: NfseResumoResponse,
-): ConsultaNfseResultadoItem {
+export function mapConsultaRequest(filters: ConsultaNfseFiltersFormValue): ConsultarNotaFiscalRequest {
   return {
-    numeroNfse: response.numeroNfse,
-    numeroRps: response.numeroRps,
-    serieRps: response.serieRps,
-    dataEmissao: response.dataEmissao,
-    documentoTomador: response.cnpjCpfTomador,
-    codigoVerificacao: response.codigoVerificacao,
-    status: response.status,
-    valorServicos: response.valorServicos,
-    valorLiquido: response.valorLiquido,
+    chaveNFe: {
+      inscricaoPrestador: Number(filters.inscricaoPrestador),
+      numeroNFe: Number(filters.numeroNFe),
+      codigoVerificacao: filters.codigoVerificacao,
+      chaveNotaNacional: filters.chaveNotaNacional || null,
+    },
   };
 }
 
-export function mapDetalheToResultadoItem(
-  response: NfseDetalheResponse,
+export function mapConsultaResponseToResultadoItem(
+  response: ConsultarNotaFiscalResponse,
+  request: ConsultarNotaFiscalRequest,
 ): ConsultaNfseResultadoItem {
-  return mapResumoToResultadoItem(response);
+  return {
+    numeroNFe: resolveStringValue(response, ['numeroNFe', 'numeroNfse']) ?? String(request.chaveNFe.numeroNFe),
+    inscricaoPrestador:
+      resolveStringValue(response, ['inscricaoPrestador']) ?? String(request.chaveNFe.inscricaoPrestador),
+    codigoVerificacao:
+      resolveStringValue(response, ['codigoVerificacao']) ?? request.chaveNFe.codigoVerificacao,
+    chaveNotaNacional:
+      resolveStringValue(response, ['chaveNotaNacional']) ?? request.chaveNFe.chaveNotaNacional ?? undefined,
+    dataEmissao: resolveStringValue(response, ['dataEmissao']),
+    status: resolveStringValue(response, ['status']),
+    valorTotal: resolveNumberValue(response, ['valorTotal']),
+    valorServicos: resolveNumberValue(response, ['valorServicos']),
+    valorLiquido: resolveNumberValue(response, ['valorLiquido']),
+  };
+}
+
+function resolveStringValue(
+  source: ConsultarNotaFiscalResponse,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return String(value);
+    }
+  }
+
+  return undefined;
+}
+
+function resolveNumberValue(
+  source: ConsultarNotaFiscalResponse,
+  keys: string[],
+): number | undefined {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const parsedValue = Number(value);
+
+      if (!Number.isNaN(parsedValue)) {
+        return parsedValue;
+      }
+    }
+  }
+
+  return undefined;
 }

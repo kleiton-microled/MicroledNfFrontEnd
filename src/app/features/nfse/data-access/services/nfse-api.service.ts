@@ -7,6 +7,8 @@ import {
   ApiListResponse,
   CancelarNfsePayload,
   CertificateResponse,
+  ConsultarNotaFiscalRequest,
+  ConsultarNotaFiscalResponse,
   CnpjConsultaResponse,
   ConsultaNfsePorRpsRequest,
   EmitirLotePayload,
@@ -21,7 +23,11 @@ import {
   OperacaoNfseResponse,
   QueryParamValue,
 } from '../models/nfse-api.models';
-import { CERTIFICATES_API_URL, NFSE_API_BASE_URL } from '../tokens/nfse-api-base-url.token';
+import {
+  CERTIFICATES_API_URL,
+  LOCAL_NFE_CONSULT_API_URL,
+  NFSE_API_BASE_URL,
+} from '../tokens/nfse-api-base-url.token';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +36,7 @@ export class NfseApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(NFSE_API_BASE_URL);
   private readonly certificatesApiUrl = inject(CERTIFICATES_API_URL);
+  private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -101,6 +108,12 @@ export class NfseApiService {
     return this.http
       .get<CertificateResponse[]>(this.certificatesApiUrl)
       .pipe(catchError((error) => this.handleError('consulta de certificados disponiveis', error)));
+  }
+
+  consultarNotaFiscal(payload: ConsultarNotaFiscalRequest): Observable<ConsultarNotaFiscalResponse> {
+    return this.http
+      .post<ConsultarNotaFiscalResponse>(this.localNfeConsultApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('consulta da nota fiscal', error)));
   }
 
   emitirRps(payload: EmitirRpsPayload): Observable<OperacaoNfseResponse> {

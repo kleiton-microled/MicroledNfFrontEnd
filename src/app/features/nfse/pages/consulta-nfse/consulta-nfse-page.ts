@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
@@ -8,7 +8,7 @@ import { ConsultaNfseFacade } from './facades/consulta-nfse.facade';
 @Component({
   selector: 'app-consulta-nfse-page',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, ConsultaNfseDetailPanelComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, ConsultaNfseDetailPanelComponent],
   templateUrl: './consulta-nfse-page.html',
   styleUrl: './consulta-nfse-page.scss',
   providers: [ConsultaNfseFacade],
@@ -18,11 +18,10 @@ export class ConsultaNfsePageComponent {
 
   protected readonly facade = inject(ConsultaNfseFacade);
   protected readonly filtersForm = this.formBuilder.nonNullable.group({
-    numeroNfse: '',
-    numeroRps: '',
-    dataInicial: '',
-    dataFinal: '',
-    documentoTomador: '',
+    inscricaoPrestador: '',
+    numeroNFe: '',
+    codigoVerificacao: '',
+    chaveNotaNacional: '',
   });
 
   protected search(): void {
@@ -31,11 +30,10 @@ export class ConsultaNfsePageComponent {
 
   protected clearFilters(): void {
     this.filtersForm.reset({
-      numeroNfse: '',
-      numeroRps: '',
-      dataInicial: '',
-      dataFinal: '',
-      documentoTomador: '',
+      inscricaoPrestador: '',
+      numeroNFe: '',
+      codigoVerificacao: '',
+      chaveNotaNacional: '',
     });
     this.facade.reset();
   }

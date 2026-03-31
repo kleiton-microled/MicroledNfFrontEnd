@@ -110,6 +110,34 @@ export interface CertificateResponse {
   isCurrentlySelected: boolean;
 }
 
+export interface ChaveNfeRequest {
+  inscricaoPrestador: number;
+  numeroNFe: number;
+  codigoVerificacao: string;
+  chaveNotaNacional: string | null;
+}
+
+export interface ConsultarNotaFiscalRequest {
+  chaveNFe: ChaveNfeRequest;
+}
+
+export interface ConsultarNotaFiscalResponse {
+  numeroNFe?: number | string;
+  numeroNfse?: number | string;
+  codigoVerificacao?: string;
+  chaveNotaNacional?: string | null;
+  inscricaoPrestador?: number | string;
+  dataEmissao?: string;
+  status?: string;
+  valorTotal?: number;
+  valorServicos?: number;
+  valorLiquido?: number;
+  prestador?: Record<string, unknown>;
+  tomador?: Record<string, unknown>;
+  servico?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export interface EnderecoPayload {
   logradouro?: string;
   numero?: string;

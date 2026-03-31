@@ -2,13 +2,16 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { finalize, map, Observable } from 'rxjs';
 
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
-import { NfseApiError, NfseDetalheResponse } from '../../../data-access/models/nfse-api.models';
+import {
+  ConsultarNotaFiscalResponse,
+  NfseApiError,
+} from '../../../data-access/models/nfse-api.models';
 import {
   ConsultaNfseFiltersFormValue,
   ConsultaNfseResultadoItem,
   ConsultaNfseSearchState,
-  mapDetalheToResultadoItem,
-  mapResumoToResultadoItem,
+  mapConsultaRequest,
+  mapConsultaResponseToResultadoItem,
 } from '../models/consulta-nfse.models';
 
 @Injectable()
@@ -22,7 +25,7 @@ export class ConsultaNfseFacade {
   private readonly _hasSearched = signal(false);
   private readonly _errorMessage = signal<string | null>(null);
   private readonly _detailErrorMessage = signal<string | null>(null);
-  private readonly _selectedDetail = signal<NfseDetalheResponse | null>(null);
+  private readonly _selectedDetail = signal<ConsultarNotaFiscalResponse | null>(null);
   private readonly _selectedNumber = signal<string | null>(null);
 
   readonly results = this._results.asReadonly();
@@ -44,13 +47,15 @@ export class ConsultaNfseFacade {
   search(filters: ConsultaNfseFiltersFormValue): void {
     const sanitizedFilters = this.sanitizeFilters(filters);
 
-    if (!this.hasAtLeastOneFilter(sanitizedFilters)) {
+    if (!this.hasRequiredFilters(sanitizedFilters)) {
       this._hasSearched.set(true);
       this._results.set([]);
       this._total.set(0);
       this._selectedDetail.set(null);
       this._selectedNumber.set(null);
-      this._errorMessage.set('Informe ao menos um filtro para realizar a pesquisa.');
+      this._errorMessage.set(
+        'Informe inscricao do prestador, numero da nota e codigo de verificacao para realizar a consulta.',
+      );
       this._detailErrorMessage.set(null);
       return;
     }
@@ -71,7 +76,7 @@ export class ConsultaNfseFacade {
 
           if (state.autoSelectedDetail) {
             this._selectedDetail.set(state.autoSelectedDetail);
-            this._selectedNumber.set(state.autoSelectedDetail.numeroNfse);
+            this._selectedNumber.set(state.items[0]?.numeroNFe ?? null);
           }
         },
         error: (error: unknown) => {
@@ -85,21 +90,28 @@ export class ConsultaNfseFacade {
   }
 
   loadDetails(item: ConsultaNfseResultadoItem): void {
-    if (!item.numeroNfse) {
-      this._detailErrorMessage.set('Nao foi possivel identificar o numero da NFSe para carregar os detalhes.');
+    if (!item.numeroNFe) {
+      this._detailErrorMessage.set('Nao foi possivel identificar o numero da nota para carregar os detalhes.');
       return;
     }
 
-    if (this._selectedNumber() === item.numeroNfse && this._selectedDetail()) {
+    if (this._selectedNumber() === item.numeroNFe && this._selectedDetail()) {
       return;
     }
 
     this._isDetailLoading.set(true);
     this._detailErrorMessage.set(null);
-    this._selectedNumber.set(item.numeroNfse);
+    this._selectedNumber.set(item.numeroNFe);
+
+    const payload = mapConsultaRequest({
+      inscricaoPrestador: item.inscricaoPrestador,
+      numeroNFe: item.numeroNFe,
+      codigoVerificacao: item.codigoVerificacao,
+      chaveNotaNacional: item.chaveNotaNacional ?? '',
+    });
 
     this.nfseApiService
-      .consultarNfsePorNumero(item.numeroNfse)
+      .consultarNotaFiscal(payload)
       .pipe(finalize(() => this._isDetailLoading.set(false)))
       .subscribe({
         next: (detail) => {
@@ -131,53 +143,32 @@ export class ConsultaNfseFacade {
   private buildSearchRequest(
     filters: ConsultaNfseFiltersFormValue,
   ): Observable<ConsultaNfseSearchState> {
-    if (filters.numeroNfse) {
-      return this.nfseApiService.consultarNfsePorNumero(filters.numeroNfse).pipe(
-        map((detail) => ({
-          items: [mapDetalheToResultadoItem(detail)],
-          total: 1,
-          autoSelectedDetail: detail,
-        })),
-      );
-    }
+    const payload = mapConsultaRequest(filters);
 
-    return this.nfseApiService
-      .consultarEmitidas({
-        numeroRps: filters.numeroRps || undefined,
-        dataInicial: filters.dataInicial || undefined,
-        dataFinal: filters.dataFinal || undefined,
-        cnpjCpfTomador: filters.documentoTomador || undefined,
-      })
-      .pipe(
-        map((response) => ({
-          items: response.items.map(mapResumoToResultadoItem),
-          total: response.total,
-        })),
-      );
+    return this.nfseApiService.consultarNotaFiscal(payload).pipe(
+      map((detail) => ({
+        items: [mapConsultaResponseToResultadoItem(detail, payload)],
+        total: 1,
+        autoSelectedDetail: detail,
+      })),
+    );
   }
 
   private sanitizeFilters(filters: ConsultaNfseFiltersFormValue): ConsultaNfseFiltersFormValue {
     return {
-      numeroNfse: filters.numeroNfse.trim(),
-      numeroRps: filters.numeroRps.trim(),
-      dataInicial: filters.dataInicial.trim(),
-      dataFinal: filters.dataFinal.trim(),
-      documentoTomador: this.normalizeDocument(filters.documentoTomador),
+      inscricaoPrestador: this.normalizeNumeric(filters.inscricaoPrestador),
+      numeroNFe: this.normalizeNumeric(filters.numeroNFe),
+      codigoVerificacao: filters.codigoVerificacao.trim().toUpperCase(),
+      chaveNotaNacional: filters.chaveNotaNacional.trim(),
     };
   }
 
-  private normalizeDocument(value: string): string {
+  private normalizeNumeric(value: string): string {
     return value.replace(/\D/g, '');
   }
 
-  private hasAtLeastOneFilter(filters: ConsultaNfseFiltersFormValue): boolean {
-    return Boolean(
-      filters.numeroNfse ||
-        filters.numeroRps ||
-        filters.dataInicial ||
-        filters.dataFinal ||
-        filters.documentoTomador,
-    );
+  private hasRequiredFilters(filters: ConsultaNfseFiltersFormValue): boolean {
+    return Boolean(filters.inscricaoPrestador && filters.numeroNFe && filters.codigoVerificacao);
   }
 
   private getFriendlyErrorMessage(error: unknown): string {

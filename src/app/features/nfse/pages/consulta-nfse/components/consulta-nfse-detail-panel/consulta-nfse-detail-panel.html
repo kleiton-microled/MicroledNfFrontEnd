@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
       <div>
         <p class="text-uppercase text-secondary small fw-semibold mb-2">Detalhes</p>
-        <h2 class="h4 mb-0">NFSe selecionada</h2>
+        <h2 class="h4 mb-0">Nota fiscal consultada</h2>
       </div>
 
       <button type="button" class="btn btn-sm btn-outline-secondary" (click)="closePanel.emit()">
@@ -25,86 +25,29 @@
     } @else if (detail(); as selectedDetail) {
       <div class="d-flex flex-column gap-4">
         <div class="row g-3">
-          <div class="col-6">
-            <div class="small text-secondary">Numero NFSe</div>
-            <div class="fw-semibold">{{ selectedDetail.numeroNfse }}</div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Status</div>
-            <div class="fw-semibold">{{ selectedDetail.status || '-' }}</div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Numero RPS</div>
-            <div class="fw-semibold">{{ selectedDetail.numeroRps || '-' }}</div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Serie RPS</div>
-            <div class="fw-semibold">{{ selectedDetail.serieRps || '-' }}</div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Emissao</div>
-            <div class="fw-semibold">
-              {{ selectedDetail.dataEmissao ? (selectedDetail.dataEmissao | date: 'dd/MM/yyyy HH:mm') : '-' }}
+          @for (entry of getSummaryEntries(selectedDetail); track entry.key) {
+            <div class="col-6">
+              <div class="small text-secondary">{{ formatSectionTitle(entry.key) }}</div>
+              <div class="fw-semibold">
+                @if (
+                  entry.key === 'valorTotal' || entry.key === 'valorServicos' || entry.key === 'valorLiquido'
+                ) {
+                  {{ getNumericValue(entry.value) | currency: 'BRL' : 'symbol' : '1.2-2' }}
+                } @else if (entry.key === 'dataEmissao') {
+                  {{ getDateValue(entry.value) | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  {{ formatRecordValue(entry.value) }}
+                }
+              </div>
             </div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Codigo verificacao</div>
-            <div class="fw-semibold">{{ selectedDetail.codigoVerificacao || '-' }}</div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Valor servicos</div>
-            <div class="fw-semibold">
-              {{ selectedDetail.valorServicos ?? 0 | currency: 'BRL' : 'symbol' : '1.2-2' }}
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="small text-secondary">Valor liquido</div>
-            <div class="fw-semibold">
-              {{ selectedDetail.valorLiquido ?? 0 | currency: 'BRL' : 'symbol' : '1.2-2' }}
-            </div>
-          </div>
+          }
         </div>
 
-        <div class="card bg-body-tertiary border-0">
-          <div class="card-body">
-            <h3 class="h6 mb-2">Discriminacao</h3>
-            <p class="mb-0 text-secondary">{{ selectedDetail.discriminacao || 'Sem detalhes adicionais.' }}</p>
-          </div>
-        </div>
-
-        @if (selectedDetail.prestador) {
+        @for (section of getObjectSections(selectedDetail); track section.key) {
           <div>
-            <h3 class="h6 mb-3">Prestador</h3>
+            <h3 class="h6 mb-3">{{ formatSectionTitle(section.key) }}</h3>
             <div class="d-flex flex-column gap-2">
-              @for (item of selectedDetail.prestador | keyvalue; track item.key) {
-                <div class="detail-item">
-                  <div class="small text-secondary">{{ item.key }}</div>
-                  <div>{{ formatRecordValue(item.value) }}</div>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        @if (selectedDetail.tomador) {
-          <div>
-            <h3 class="h6 mb-3">Tomador</h3>
-            <div class="d-flex flex-column gap-2">
-              @for (item of selectedDetail.tomador | keyvalue; track item.key) {
-                <div class="detail-item">
-                  <div class="small text-secondary">{{ item.key }}</div>
-                  <div>{{ formatRecordValue(item.value) }}</div>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        @if (selectedDetail.servico) {
-          <div>
-            <h3 class="h6 mb-3">Servico</h3>
-            <div class="d-flex flex-column gap-2">
-              @for (item of selectedDetail.servico | keyvalue; track item.key) {
+              @for (item of section.value | keyvalue; track item.key) {
                 <div class="detail-item">
                   <div class="small text-secondary">{{ item.key }}</div>
                   <div>{{ formatRecordValue(item.value) }}</div>
@@ -116,9 +59,9 @@
       </div>
     } @else {
       <div class="empty-panel text-center py-4">
-        <h3 class="h5">Nenhuma NFSe selecionada</h3>
+        <h3 class="h5">Nenhuma nota carregada</h3>
         <p class="text-secondary mb-0">
-          Clique em uma linha da tabela para visualizar os detalhes da nota fiscal.
+          Consulte uma nota fiscal e clique no resultado para visualizar os detalhes retornados.
         </p>
       </div>
     }

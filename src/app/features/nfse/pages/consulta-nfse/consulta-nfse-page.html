@@ -1,10 +1,10 @@
 <section class="d-flex flex-column gap-4">
   <header class="d-flex flex-column gap-2">
-    <span class="badge rounded-pill text-bg-primary align-self-start">Consulta NFSe</span>
+    <span class="badge rounded-pill text-bg-primary align-self-start">Consulta de nota fiscal</span>
     <div>
-      <h1 class="h2 mb-2">Consulta de notas fiscais</h1>
+      <h1 class="h2 mb-2">Consultar nota fiscal por chave</h1>
       <p class="text-secondary mb-0">
-        Pesquise NFSe por numero, RPS, periodo ou documento e visualize os detalhes em um painel lateral.
+        Informe os dados principais da nota para consultar o endpoint local e visualizar os detalhes.
       </p>
     </div>
   </header>
@@ -12,35 +12,51 @@
   <form [formGroup]="filtersForm" (ngSubmit)="search()" class="card border-0 shadow-sm">
     <div class="card-body p-4">
       <div class="row g-3">
-        <div class="col-12 col-md-6 col-xl-3">
-          <label class="form-label" for="numeroNfse">Numero da NFSe</label>
-          <input id="numeroNfse" type="text" class="form-control" formControlName="numeroNfse" />
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-3">
-          <label class="form-label" for="numeroRps">Numero do RPS</label>
-          <input id="numeroRps" type="text" class="form-control" formControlName="numeroRps" />
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-2">
-          <label class="form-label" for="dataInicial">Periodo inicial</label>
-          <input id="dataInicial" type="date" class="form-control" formControlName="dataInicial" />
-        </div>
-
-        <div class="col-12 col-md-6 col-xl-2">
-          <label class="form-label" for="dataFinal">Periodo final</label>
-          <input id="dataFinal" type="date" class="form-control" formControlName="dataFinal" />
-        </div>
-
-        <div class="col-12 col-xl-2">
-          <label class="form-label" for="documentoTomador">CNPJ/CPF</label>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="inscricaoPrestador">Inscricao do prestador</label>
           <input
-            id="documentoTomador"
+            id="inscricaoPrestador"
             type="text"
             class="form-control"
-            formControlName="documentoTomador"
-            placeholder="Somente numeros"
+            formControlName="inscricaoPrestador"
+            placeholder="Ex.: 12345678"
           />
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="numeroNFe">Numero da nota</label>
+          <input
+            id="numeroNFe"
+            type="text"
+            class="form-control"
+            formControlName="numeroNFe"
+            placeholder="Ex.: 12345"
+          />
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="codigoVerificacao">Codigo de verificacao</label>
+          <input
+            id="codigoVerificacao"
+            type="text"
+            class="form-control"
+            formControlName="codigoVerificacao"
+            placeholder="Ex.: ABCD1234"
+          />
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="chaveNotaNacional">Chave nacional da nota</label>
+          <input
+            id="chaveNotaNacional"
+            type="text"
+            class="form-control"
+            formControlName="chaveNotaNacional"
+            placeholder="Opcional"
+          />
+          <div class="form-text">
+            Campo opcional para complementar a consulta quando a API disponibilizar essa chave.
+          </div>
         </div>
       </div>
 
@@ -49,28 +65,28 @@
           @if (facade.isLoading()) {
             <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
           }
-          Pesquisar
+          Consultar nota
         </button>
 
         <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
-          Limpar filtros
+          Limpar dados
         </button>
       </div>
     </div>
   </form>
 
   <div class="row g-4 align-items-start">
-    <div class="col-12 col-xl-8">
+    <div class="col-12 col-xl-7">
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
             <div>
-              <h2 class="h4 mb-1">Resultados</h2>
+              <h2 class="h4 mb-1">Resultado da consulta</h2>
               <p class="text-secondary mb-0">
                 @if (facade.hasResults()) {
-                  {{ facade.total() }} registro(s) encontrado(s).
+                  Consulta concluida com sucesso.
                 } @else {
-                  Resultado da pesquisa atual.
+                  Resultado retornado pela API local.
                 }
               </p>
             </div>
@@ -94,16 +110,16 @@
             </div>
           } @else if (facade.isEmpty()) {
             <div class="empty-state text-center py-5">
-              <h3 class="h5">Nenhum resultado encontrado</h3>
+              <h3 class="h5">Nenhuma nota encontrada</h3>
               <p class="text-secondary mb-0">
-                Ajuste os filtros informados e tente novamente para localizar uma NFSe.
+                Confira os dados informados e tente novamente com uma combinacao valida.
               </p>
             </div>
           } @else if (!facade.hasSearched()) {
             <div class="empty-state text-center py-5">
-              <h3 class="h5">Pronto para pesquisar</h3>
+              <h3 class="h5">Pronto para consultar</h3>
               <p class="text-secondary mb-0">
-                Informe pelo menos um filtro e clique em pesquisar para consultar as notas fiscais.
+                Preencha os dados da chave da nota e clique em consultar para carregar o resultado.
               </p>
             </div>
           } @else {
@@ -111,38 +127,34 @@
               <table class="table table-hover align-middle mb-0">
                 <thead>
                   <tr>
-                    <th>NFSe</th>
-                    <th>RPS</th>
-                    <th>Emissao</th>
-                    <th>CNPJ/CPF</th>
+                    <th>Numero</th>
+                    <th>Prestador</th>
+                    <th>Codigo verificacao</th>
                     <th>Status</th>
                     <th class="text-end">Valor</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (item of facade.results(); track item.numeroNfse) {
+                  @for (item of facade.results(); track item.numeroNFe) {
                     <tr
                       class="clickable-row"
-                      [class.table-active]="facade.selectedNumber() === item.numeroNfse"
+                      [class.table-active]="facade.selectedNumber() === item.numeroNFe"
                       (click)="facade.loadDetails(item)"
                     >
                       <td>
-                        <div class="fw-semibold">{{ item.numeroNfse }}</div>
-                        <div class="small text-secondary">{{ item.codigoVerificacao || '-' }}</div>
+                        <div class="fw-semibold">{{ item.numeroNFe }}</div>
+                        <div class="small text-secondary">{{ item.chaveNotaNacional || '-' }}</div>
                       </td>
-                      <td>
-                        <div>{{ item.numeroRps || '-' }}</div>
-                        <div class="small text-secondary">{{ item.serieRps || '-' }}</div>
-                      </td>
-                      <td>
-                        {{ item.dataEmissao ? (item.dataEmissao | date: 'dd/MM/yyyy') : '-' }}
-                      </td>
-                      <td>{{ item.documentoTomador || '-' }}</td>
+                      <td>{{ item.inscricaoPrestador }}</td>
+                      <td>{{ item.codigoVerificacao }}</td>
                       <td>
                         <span class="badge text-bg-light border">{{ item.status || '-' }}</span>
                       </td>
                       <td class="text-end">
-                        {{ item.valorServicos ?? item.valorLiquido ?? 0 | currency: 'BRL' : 'symbol' : '1.2-2' }}
+                        {{
+                          item.valorTotal ?? item.valorServicos ?? item.valorLiquido ?? 0
+                            | currency: 'BRL' : 'symbol' : '1.2-2'
+                        }}
                       </td>
                     </tr>
                   }
@@ -154,7 +166,7 @@
       </div>
     </div>
 
-    <div class="col-12 col-xl-4">
+    <div class="col-12 col-xl-5">
       <app-consulta-nfse-detail-panel
         [detail]="facade.selectedDetail()"
         [loading]="facade.isDetailLoading()"
