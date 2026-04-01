@@ -254,8 +254,10 @@ export interface RpsArquivoPrestadorPayload {
 }
 
 export interface RpsArquivoEnderecoPayload {
+  tipoLogradouro?: string | null;
   logradouro: string;
   numero: string;
+  complemento?: string | null;
   bairro: string;
   codigoMunicipio: number;
   uf: string;
@@ -293,6 +295,79 @@ export interface RpsArquivoItemRpsPayload {
 export interface GerarArquivoRpsRequest {
   prestador: RpsArquivoPrestadorPayload;
   rpsList: RpsArquivoItemRpsPayload[];
+  dataInicio: string;
+  dataFim: string;
+  transacao: boolean;
+}
+
+export interface ProcessarRpsPrestadorPayload extends RpsArquivoPrestadorPayload {
+  email: string;
+  endereco: RpsArquivoEnderecoPayload;
+}
+
+export interface ProcessarRpsTomadorPayload extends RpsArquivoTomadorPayload {
+  inscricaoMunicipal: string | number | null;
+  inscricaoEstadual: string | number | null;
+}
+
+export interface ProcessarRpsTributosPayload {
+  valorPIS: number;
+  valorCOFINS: number;
+  valorINSS: number;
+  valorIR: number;
+  valorCSLL: number;
+  valorIPI: number;
+  valorCargaTributaria: number;
+  percentualCargaTributaria: number;
+  fonteCargaTributaria: string;
+  valorTotalRecebido: number;
+  valorFinalCobrado: number;
+  valorMulta: number;
+  valorJuros: number;
+  ncm: string;
+}
+
+export interface ProcessarRpsIbsCbsDestPayload {
+  cpfCnpj: string;
+  nif: string | null;
+  naoNif: string | null;
+  razaoSocial: string;
+  email: string;
+  endereco: RpsArquivoEnderecoPayload;
+}
+
+export interface ProcessarRpsIbsCbsImovelObraPayload {
+  inscricaoImobiliariaFiscal: string | null;
+  cCib: string | null;
+  cObra: string | null;
+  endereco: RpsArquivoEnderecoPayload;
+}
+
+export interface ProcessarRpsIbsCbsPayload {
+  finNFSe: number;
+  indFinal: number;
+  cIndOp: string;
+  tpOper: string | null;
+  refNfSe: string[];
+  tpEnteGov: string | null;
+  indDest: number;
+  dest: ProcessarRpsIbsCbsDestPayload;
+  cClassTrib: string;
+  cClassTribReg: string;
+  nbs: string;
+  cLocPrestacao: number;
+  imovelObra: ProcessarRpsIbsCbsImovelObraPayload;
+}
+
+export interface ProcessarRpsItemRpsPayload extends RpsArquivoItemRpsPayload {
+  tomador: ProcessarRpsTomadorPayload;
+  tributos: ProcessarRpsTributosPayload;
+  ibsCbs: ProcessarRpsIbsCbsPayload;
+}
+
+export interface ProcessarRpsRequest {
+  prestador: ProcessarRpsPrestadorPayload;
+  rpsList: ProcessarRpsItemRpsPayload[];
   dataInicio: string;
   dataFim: string;
   transacao: boolean;

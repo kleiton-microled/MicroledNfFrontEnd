@@ -27,6 +27,7 @@ import {
   NfseQueryFilters,
   NfseResumoResponse,
   OperacaoNfseResponse,
+  ProcessarRpsRequest,
   ProcessarRpsResponse,
   QueryParamValue,
   SelectCertificatePayload,
@@ -152,7 +153,7 @@ export class NfseApiService {
       .pipe(catchError((error) => this.handleError('geracao de arquivos RPS', error)));
   }
 
-  processarRps(payload: GerarArquivoRpsRequest): Observable<ProcessarRpsResponse> {
+  processarRps(payload: ProcessarRpsRequest): Observable<ProcessarRpsResponse> {
     return this.http
       .post<ProcessarRpsResponse>(this.localRpsProcessApiUrl, payload)
       .pipe(catchError((error) => this.handleError('envio da nota', error)));

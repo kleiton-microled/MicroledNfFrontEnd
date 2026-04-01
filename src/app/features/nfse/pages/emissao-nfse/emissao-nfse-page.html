@@ -60,6 +60,10 @@
               />
             </div>
             <div class="col-12 col-md-4">
+              <label class="form-label" for="prestadorEmail">Email do prestador</label>
+              <input id="prestadorEmail" class="form-control" type="email" formControlName="prestadorEmail" />
+            </div>
+            <div class="col-12 col-md-4">
               <label class="form-label" for="dataInicio">Data inicio</label>
               <input id="dataInicio" class="form-control" type="date" formControlName="dataInicio" />
             </div>
@@ -73,6 +77,58 @@
                 <input id="transacao" class="form-check-input" type="checkbox" formControlName="transacao" />
                 <label class="form-check-label" for="transacao">Enviar como transacao</label>
               </div>
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="prestadorTipoLogradouro">Tipo logradouro</label>
+              <input
+                id="prestadorTipoLogradouro"
+                class="form-control"
+                type="text"
+                formControlName="prestadorTipoLogradouro"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="prestadorLogradouro">Logradouro</label>
+              <input
+                id="prestadorLogradouro"
+                class="form-control"
+                type="text"
+                formControlName="prestadorLogradouro"
+              />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="prestadorNumero">Numero</label>
+              <input id="prestadorNumero" class="form-control" type="text" formControlName="prestadorNumero" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="prestadorComplemento">Complemento</label>
+              <input
+                id="prestadorComplemento"
+                class="form-control"
+                type="text"
+                formControlName="prestadorComplemento"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="prestadorBairro">Bairro</label>
+              <input id="prestadorBairro" class="form-control" type="text" formControlName="prestadorBairro" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="prestadorCodigoMunicipio">Codigo municipio</label>
+              <input
+                id="prestadorCodigoMunicipio"
+                class="form-control"
+                type="text"
+                formControlName="prestadorCodigoMunicipio"
+              />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="prestadorUf">UF</label>
+              <input id="prestadorUf" class="form-control" type="text" formControlName="prestadorUf" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="prestadorCep">CEP</label>
+              <input id="prestadorCep" class="form-control" type="text" formControlName="prestadorCep" />
             </div>
           </div>
         </section>
@@ -161,6 +217,24 @@
               <input id="tomadorCpfCnpj" class="form-control" type="text" formControlName="tomadorCpfCnpj" />
             </div>
             <div class="col-12 col-md-4">
+              <label class="form-label" for="tomadorInscricaoMunicipal">Inscricao municipal</label>
+              <input
+                id="tomadorInscricaoMunicipal"
+                class="form-control"
+                type="text"
+                formControlName="tomadorInscricaoMunicipal"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tomadorInscricaoEstadual">Inscricao estadual</label>
+              <input
+                id="tomadorInscricaoEstadual"
+                class="form-control"
+                type="text"
+                formControlName="tomadorInscricaoEstadual"
+              />
+            </div>
+            <div class="col-12 col-md-4">
               <label class="form-label" for="tomadorRazaoSocial">Razao social</label>
               <input
                 id="tomadorRazaoSocial"
@@ -172,6 +246,15 @@
             <div class="col-12 col-md-4">
               <label class="form-label" for="tomadorEmail">Email</label>
               <input id="tomadorEmail" class="form-control" type="email" formControlName="tomadorEmail" />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="enderecoTipoLogradouro">Tipo logradouro</label>
+              <input
+                id="enderecoTipoLogradouro"
+                class="form-control"
+                type="text"
+                formControlName="enderecoTipoLogradouro"
+              />
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="enderecoLogradouro">Logradouro</label>
@@ -185,6 +268,15 @@
             <div class="col-12 col-md-2">
               <label class="form-label" for="enderecoNumero">Numero</label>
               <input id="enderecoNumero" class="form-control" type="text" formControlName="enderecoNumero" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="enderecoComplemento">Complemento</label>
+              <input
+                id="enderecoComplemento"
+                class="form-control"
+                type="text"
+                formControlName="enderecoComplemento"
+              />
             </div>
             <div class="col-12 col-md-3">
               <label class="form-label" for="enderecoBairro">Bairro</label>
@@ -206,6 +298,200 @@
             <div class="col-12 col-md-3">
               <label class="form-label" for="enderecoCep">CEP</label>
               <input id="enderecoCep" class="form-control" type="text" formControlName="enderecoCep" />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="h4 mb-3">Tributos</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorPIS">Valor PIS</label>
+              <input id="tributosValorPIS" class="form-control" type="text" formControlName="tributosValorPIS" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorCOFINS">Valor COFINS</label>
+              <input
+                id="tributosValorCOFINS"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorCOFINS"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorINSS">Valor INSS</label>
+              <input
+                id="tributosValorINSS"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorINSS"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorIR">Valor IR</label>
+              <input id="tributosValorIR" class="form-control" type="text" formControlName="tributosValorIR" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorCSLL">Valor CSLL</label>
+              <input id="tributosValorCSLL" class="form-control" type="text" formControlName="tributosValorCSLL" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorIPI">Valor IPI</label>
+              <input id="tributosValorIPI" class="form-control" type="text" formControlName="tributosValorIPI" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorCargaTributaria">Carga tributaria</label>
+              <input
+                id="tributosValorCargaTributaria"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorCargaTributaria"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosPercentualCargaTributaria">Percentual carga</label>
+              <input
+                id="tributosPercentualCargaTributaria"
+                class="form-control"
+                type="text"
+                formControlName="tributosPercentualCargaTributaria"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosFonteCargaTributaria">Fonte carga tributaria</label>
+              <input
+                id="tributosFonteCargaTributaria"
+                class="form-control"
+                type="text"
+                formControlName="tributosFonteCargaTributaria"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosValorTotalRecebido">Valor total recebido</label>
+              <input
+                id="tributosValorTotalRecebido"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorTotalRecebido"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosValorFinalCobrado">Valor final cobrado</label>
+              <input
+                id="tributosValorFinalCobrado"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorFinalCobrado"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosValorMulta">Valor multa</label>
+              <input
+                id="tributosValorMulta"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorMulta"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosValorJuros">Valor juros</label>
+              <input
+                id="tributosValorJuros"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorJuros"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="tributosNcm">NCM</label>
+              <input id="tributosNcm" class="form-control" type="text" formControlName="tributosNcm" />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="h4 mb-3">IBS / CBS</h2>
+          <div class="row g-3">
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="ibsFinNFSe">Fin NFSe</label>
+              <input id="ibsFinNFSe" class="form-control" type="text" formControlName="ibsFinNFSe" />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="ibsIndFinal">Ind final</label>
+              <input id="ibsIndFinal" class="form-control" type="text" formControlName="ibsIndFinal" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsCIndOp">Codigo indicativo operacao</label>
+              <input id="ibsCIndOp" class="form-control" type="text" formControlName="ibsCIndOp" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsTpOper">Tipo operacao</label>
+              <input id="ibsTpOper" class="form-control" type="text" formControlName="ibsTpOper" />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="ibsRefNfSe">NFSe de referencia</label>
+              <textarea
+                id="ibsRefNfSe"
+                class="form-control"
+                rows="2"
+                formControlName="ibsRefNfSe"
+              ></textarea>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsTpEnteGov">Tipo ente governo</label>
+              <input id="ibsTpEnteGov" class="form-control" type="text" formControlName="ibsTpEnteGov" />
+            </div>
+            <div class="col-12 col-md-2">
+              <label class="form-label" for="ibsIndDest">Ind destino</label>
+              <input id="ibsIndDest" class="form-control" type="text" formControlName="ibsIndDest" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsDestNif">NIF destino</label>
+              <input id="ibsDestNif" class="form-control" type="text" formControlName="ibsDestNif" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsDestNaoNif">Nao NIF</label>
+              <input id="ibsDestNaoNif" class="form-control" type="text" formControlName="ibsDestNaoNif" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsCClassTrib">Classe tributaria</label>
+              <input id="ibsCClassTrib" class="form-control" type="text" formControlName="ibsCClassTrib" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsCClassTribReg">Classe tributaria reg</label>
+              <input
+                id="ibsCClassTribReg"
+                class="form-control"
+                type="text"
+                formControlName="ibsCClassTribReg"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsNbs">NBS</label>
+              <input id="ibsNbs" class="form-control" type="text" formControlName="ibsNbs" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="ibsCLocPrestacao">Local prestacao</label>
+              <input id="ibsCLocPrestacao" class="form-control" type="text" formControlName="ibsCLocPrestacao" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsImovelInscricaoImobiliariaFiscal">
+                Inscricao imobiliaria fiscal
+              </label>
+              <input
+                id="ibsImovelInscricaoImobiliariaFiscal"
+                class="form-control"
+                type="text"
+                formControlName="ibsImovelInscricaoImobiliariaFiscal"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsImovelCCib">CIB</label>
+              <input id="ibsImovelCCib" class="form-control" type="text" formControlName="ibsImovelCCib" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="ibsImovelCObra">Codigo obra</label>
+              <input id="ibsImovelCObra" class="form-control" type="text" formControlName="ibsImovelCObra" />
             </div>
           </div>
         </section>

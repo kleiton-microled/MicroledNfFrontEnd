@@ -6,6 +6,7 @@ import {
   applyCertificateToEmissaoRpsTesteFormValue,
   getDefaultEmissaoRpsTesteFormValue,
   mapFormToGerarArquivoRpsRequest,
+  mapFormToProcessarRpsRequest,
 } from './models/emissao-rps-teste.models';
 
 @Component({
@@ -45,7 +46,7 @@ export class EmissaoNfsePageComponent implements OnInit {
   }
 
   protected processRps(): void {
-    this.facade.processRps(mapFormToGerarArquivoRpsRequest(this.form.getRawValue()));
+    this.facade.processRps(mapFormToProcessarRpsRequest(this.form.getRawValue()));
   }
 
   protected consultarStatus(): void {

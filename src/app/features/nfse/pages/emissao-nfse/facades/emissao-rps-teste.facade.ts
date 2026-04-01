@@ -7,6 +7,7 @@ import {
   GerarArquivoRpsRequest,
   GerarArquivoRpsResponse,
   NfseApiError,
+  ProcessarRpsRequest,
   ProcessarRpsResponse,
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
@@ -93,7 +94,7 @@ export class EmissaoRpsTesteFacade {
       });
   }
 
-  processRps(payload: GerarArquivoRpsRequest): void {
+  processRps(payload: ProcessarRpsRequest): void {
     this._isProcessing.set(true);
     this._processErrorMessage.set(null);
     this._processResult.set(null);
