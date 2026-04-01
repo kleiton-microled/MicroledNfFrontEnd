@@ -144,6 +144,7 @@ export interface NotaFiscalConsultaItemResponse {
   valorDeducoes?: number;
   valorISS?: number;
   valorLiquido?: number;
+  notaXml?: string;
   prestador?: Record<string, unknown>;
   tomador?: Record<string, unknown>;
   servico?: Record<string, unknown>;

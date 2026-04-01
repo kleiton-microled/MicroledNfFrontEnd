@@ -96,4 +96,27 @@ export class ConsultaNfseDetailPanelComponent {
   protected getDateValue(value: unknown): string | null {
     return typeof value === 'string' && value.trim().length > 0 ? value : null;
   }
+
+  protected hasXml(detail: NotaFiscalConsultaItemResponse): boolean {
+    return typeof detail.notaXml === 'string' && detail.notaXml.trim().length > 0;
+  }
+
+  protected downloadXml(detail: NotaFiscalConsultaItemResponse): void {
+    if (!this.hasXml(detail)) {
+      return;
+    }
+
+    const numeroNfe = detail.chaveNFe?.numeroNFe ?? 'nota';
+    const xmlContent = detail.notaXml!.trim();
+    const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = objectUrl;
+    anchor.download = `nfe-${numeroNfe}.xml`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(objectUrl);
+  }
 }
