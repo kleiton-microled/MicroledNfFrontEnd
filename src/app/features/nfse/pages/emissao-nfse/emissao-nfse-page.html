@@ -473,25 +473,16 @@
         <div class="d-flex flex-column gap-4">
           <div>
             <h2 class="h4 mb-2">Status do protocolo</h2>
-            <p class="text-secondary mb-0">{{ statusResult.message }}</p>
+            <p class="text-secondary mb-0">
+              Situacao atual: <strong>{{ statusResult.situacaoNome || 'Nao informada' }}</strong>
+            </p>
           </div>
 
-          @if (statusResult.warnings.length > 0) {
-            <div class="alert alert-info mb-0">
-              <div class="fw-semibold mb-2">Alertas</div>
-              <ul class="mb-0 ps-3">
-                @for (warning of statusResult.warnings; track warning) {
-                  <li>{{ warning }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          @if (statusResult.errors.length > 0) {
+          @if (statusResult.erros.length > 0) {
             <div class="alert alert-danger mb-0">
               <div class="fw-semibold mb-2">Erros</div>
               <ul class="mb-0 ps-3">
-                @for (error of statusResult.errors; track error) {
+                @for (error of statusResult.erros; track error) {
                   <li>{{ error }}</li>
                 }
               </ul>
@@ -502,54 +493,52 @@
             <div class="col-12 col-md-4">
               <div class="result-item">
                 <div class="small text-secondary">Sucesso</div>
-                <div>{{ statusResult.success ? 'Sim' : 'Nao' }}</div>
+                <div>{{ statusResult.sucesso ? 'Sim' : 'Nao' }}</div>
               </div>
             </div>
 
             <div class="col-12 col-md-4">
               <div class="result-item">
-                <div class="small text-secondary">Enviado ao WebService</div>
-                <div>{{ statusResult.isSentToWebService ? 'Sim' : 'Nao' }}</div>
+                <div class="small text-secondary">Situacao codigo</div>
+                <div>{{ statusResult.situacaoCodigo ?? 'Nao informado' }}</div>
               </div>
             </div>
 
             <div class="col-12 col-md-4">
               <div class="result-item">
                 <div class="small text-secondary">Protocolo</div>
-                <div>{{ statusResult.protocol || 'Nao informado' }}</div>
+                <div>{{ facade.protocol() || 'Nao informado' }}</div>
               </div>
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <div class="result-item">
-                <div class="small text-secondary">Arquivo RPS</div>
-                <div class="text-break">{{ statusResult.localFilePath || 'Nao informado' }}</div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary mt-3"
-                  [disabled]="!statusResult.localFilePath"
-                  (click)="facade.openGeneratedFile(statusResult.localFilePath)"
-                >
-                  Baixar arquivo RPS
-                </button>
+                <div class="small text-secondary">Numero lote</div>
+                <div>{{ statusResult.numeroLote ?? 'Nao informado' }}</div>
               </div>
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <div class="result-item">
-                <div class="small text-secondary">Arquivo SOAP</div>
-                <div class="text-break">{{ statusResult.soapFilePath || 'Nao informado' }}</div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary mt-3"
-                  [disabled]="!statusResult.soapFilePath"
-                  (click)="facade.openGeneratedFile(statusResult.soapFilePath)"
-                >
-                  Baixar arquivo SOAP
-                </button>
+                <div class="small text-secondary">Data recebimento</div>
+                <div>{{ statusResult.dataRecebimento || 'Nao informada' }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="result-item">
+                <div class="small text-secondary">Data processamento</div>
+                <div>{{ statusResult.dataProcessamento || 'Nao informada' }}</div>
               </div>
             </div>
           </div>
+
+          @if (statusResult.resultadoOperacao) {
+            <div class="result-item">
+              <div class="small text-secondary mb-2">Resultado da operacao</div>
+              <pre class="mb-0 text-break text-wrap">{{ statusResult.resultadoOperacao }}</pre>
+            </div>
+          }
         </div>
       </div>
     </div>

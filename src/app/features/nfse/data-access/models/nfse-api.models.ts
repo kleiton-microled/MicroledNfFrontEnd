@@ -314,13 +314,12 @@ export interface ConsultarStatusRpsRequest {
 }
 
 export interface ConsultarStatusRpsResponse {
-  success: boolean;
-  isSentToWebService: boolean;
-  localFilePath: string | null;
-  soapFilePath: string | null;
-  protocol: string | null;
-  message: string;
-  warnings: string[];
-  errors: string[];
-  nfeRpsKeys: string[];
+  sucesso: boolean;
+  situacaoCodigo: number | null;
+  situacaoNome: string | null;
+  numeroLote: number | string | null;
+  dataRecebimento: string | null;
+  dataProcessamento: string | null;
+  resultadoOperacao: string | null;
+  erros: string[];
 }

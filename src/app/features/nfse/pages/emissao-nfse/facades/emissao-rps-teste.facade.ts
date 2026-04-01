@@ -149,9 +149,8 @@ export class EmissaoRpsTesteFacade {
       .subscribe({
         next: (response) => {
           this._statusResult.set(response);
-
-          if (!response.success) {
-            this._statusErrorMessage.set(response.errors[0] ?? response.message);
+          if (response.erros.length > 0) {
+            this._statusErrorMessage.set(response.erros[0]);
           }
         },
         error: (error: unknown) => {
