@@ -3,6 +3,7 @@ import { finalize } from 'rxjs';
 
 import {
   CertificateResponse,
+  ConsultarStatusRpsResponse,
   GerarArquivoRpsRequest,
   GerarArquivoRpsResponse,
   NfseApiError,
@@ -20,6 +21,10 @@ export class EmissaoRpsTesteFacade {
   private readonly _isProcessing = signal(false);
   private readonly _processErrorMessage = signal<string | null>(null);
   private readonly _processResult = signal<ProcessarRpsResponse | null>(null);
+  private readonly _isCheckingStatus = signal(false);
+  private readonly _statusErrorMessage = signal<string | null>(null);
+  private readonly _statusResult = signal<ConsultarStatusRpsResponse | null>(null);
+  private readonly _protocol = signal<string>('');
   private readonly _currentCertificate = signal<CertificateResponse | null>(null);
   private readonly _loadingCurrentCertificate = signal(false);
   private readonly _currentCertificateMessage = signal<string | null>(null);
@@ -30,6 +35,10 @@ export class EmissaoRpsTesteFacade {
   readonly isProcessing = this._isProcessing.asReadonly();
   readonly processErrorMessage = this._processErrorMessage.asReadonly();
   readonly processResult = this._processResult.asReadonly();
+  readonly isCheckingStatus = this._isCheckingStatus.asReadonly();
+  readonly statusErrorMessage = this._statusErrorMessage.asReadonly();
+  readonly statusResult = this._statusResult.asReadonly();
+  readonly protocol = this._protocol.asReadonly();
   readonly currentCertificate = this._currentCertificate.asReadonly();
   readonly loadingCurrentCertificate = this._loadingCurrentCertificate.asReadonly();
   readonly currentCertificateMessage = this._currentCertificateMessage.asReadonly();
@@ -95,6 +104,7 @@ export class EmissaoRpsTesteFacade {
       .subscribe({
         next: (response) => {
           this._processResult.set(response);
+          this._protocol.set(response.protocol ?? '');
 
           if (!response.success) {
             this._processErrorMessage.set(response.errors[0] ?? response.message);
@@ -103,6 +113,41 @@ export class EmissaoRpsTesteFacade {
         error: (error: unknown) => {
           this._processResult.set(null);
           this._processErrorMessage.set(this.getProcessErrorMessage(error));
+        },
+      });
+  }
+
+  setProtocol(protocol: string): void {
+    this._protocol.set(protocol);
+  }
+
+  consultarStatus(): void {
+    const protocol = this._protocol().trim();
+
+    if (!protocol) {
+      this._statusErrorMessage.set('Informe ou gere um protocolo antes de consultar o status.');
+      this._statusResult.set(null);
+      return;
+    }
+
+    this._isCheckingStatus.set(true);
+    this._statusErrorMessage.set(null);
+    this._statusResult.set(null);
+
+    this.nfseApiService
+      .consultarStatusRps({ numeroProtocolo: protocol })
+      .pipe(finalize(() => this._isCheckingStatus.set(false)))
+      .subscribe({
+        next: (response) => {
+          this._statusResult.set(response);
+
+          if (!response.success) {
+            this._statusErrorMessage.set(response.errors[0] ?? response.message);
+          }
+        },
+        error: (error: unknown) => {
+          this._statusResult.set(null);
+          this._statusErrorMessage.set(this.getStatusErrorMessage(error));
         },
       });
   }
@@ -140,6 +185,14 @@ export class EmissaoRpsTesteFacade {
     }
 
     return 'Nao foi possivel enviar a nota.';
+  }
+
+  private getStatusErrorMessage(error: unknown): string {
+    if (error instanceof NfseApiError) {
+      return error.message;
+    }
+
+    return 'Nao foi possivel consultar o status do protocolo.';
   }
 
   private getCurrentCertificateMessage(error: unknown): string {

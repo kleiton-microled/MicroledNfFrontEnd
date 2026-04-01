@@ -307,3 +307,19 @@ export interface ProcessarRpsResponse {
   errors: string[];
   nfeRpsKeys: string[];
 }
+
+export interface ConsultarStatusRpsRequest {
+  numeroProtocolo: string;
+}
+
+export interface ConsultarStatusRpsResponse {
+  success: boolean;
+  isSentToWebService: boolean;
+  localFilePath: string | null;
+  soapFilePath: string | null;
+  protocol: string | null;
+  message: string;
+  warnings: string[];
+  errors: string[];
+  nfeRpsKeys: string[];
+}

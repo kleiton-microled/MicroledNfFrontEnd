@@ -7,6 +7,8 @@ import {
   ApiListResponse,
   CancelarNfsePayload,
   CertificateResponse,
+  ConsultarStatusRpsRequest,
+  ConsultarStatusRpsResponse,
   ConsultarNotaFiscalRequest,
   ConsultarNotaFiscalResponse,
   CnpjConsultaResponse,
@@ -32,6 +34,7 @@ import {
   CERTIFICATES_SELECT_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   LOCAL_RPS_PROCESS_API_URL,
+  LOCAL_RPS_STATUS_API_URL,
   LOCAL_RPS_GENERATE_FILES_API_URL,
   NFSE_API_BASE_URL,
 } from '../tokens/nfse-api-base-url.token';
@@ -47,6 +50,7 @@ export class NfseApiService {
   private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
   private readonly localRpsGenerateFilesApiUrl = inject(LOCAL_RPS_GENERATE_FILES_API_URL);
   private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
+  private readonly localRpsStatusApiUrl = inject(LOCAL_RPS_STATUS_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -142,6 +146,12 @@ export class NfseApiService {
     return this.http
       .post<ProcessarRpsResponse>(this.localRpsProcessApiUrl, payload)
       .pipe(catchError((error) => this.handleError('envio da nota', error)));
+  }
+
+  consultarStatusRps(payload: ConsultarStatusRpsRequest): Observable<ConsultarStatusRpsResponse> {
+    return this.http
+      .post<ConsultarStatusRpsResponse>(this.localRpsStatusApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('consulta de status do protocolo', error)));
   }
 
   emitirRps(payload: EmitirRpsPayload): Observable<OperacaoNfseResponse> {

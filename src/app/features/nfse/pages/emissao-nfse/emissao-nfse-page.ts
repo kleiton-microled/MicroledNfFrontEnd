@@ -48,6 +48,15 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.processRps(mapFormToGerarArquivoRpsRequest(this.form.getRawValue()));
   }
 
+  protected consultarStatus(): void {
+    this.facade.consultarStatus();
+  }
+
+  protected updateProtocol(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.facade.setProtocol(input.value);
+  }
+
   protected resetForm(): void {
     const defaultValue = getDefaultEmissaoRpsTesteFormValue();
     const currentCertificate = this.facade.currentCertificate();
