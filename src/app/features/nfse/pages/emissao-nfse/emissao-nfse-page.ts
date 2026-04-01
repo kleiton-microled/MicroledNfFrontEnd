@@ -26,14 +26,41 @@ export class EmissaoNfsePageComponent implements OnInit {
   constructor() {
     effect(() => {
       const currentCertificate = this.facade.currentCertificate();
+      const locked = currentCertificate !== null;
 
-      if (!currentCertificate) {
-        return;
+      if (currentCertificate) {
+        this.form.patchValue(
+          applyCertificateToEmissaoRpsTesteFormValue(this.form.getRawValue(), currentCertificate),
+        );
       }
 
-      this.form.patchValue(
-        applyCertificateToEmissaoRpsTesteFormValue(this.form.getRawValue(), currentCertificate),
-      );
+      const prestadorLockedNames = [
+        'prestadorCpfCnpj',
+        'prestadorInscricaoMunicipal',
+        'prestadorRazaoSocial',
+        'prestadorEmail',
+        'prestadorTipoLogradouro',
+        'prestadorLogradouro',
+        'prestadorNumero',
+        'prestadorComplemento',
+        'prestadorBairro',
+        'prestadorCodigoMunicipio',
+        'prestadorUf',
+        'prestadorCep',
+        'inscricaoPrestador',
+      ] as const;
+
+      for (const name of prestadorLockedNames) {
+        const control = this.form.get(name);
+        if (!control) {
+          continue;
+        }
+        if (locked) {
+          control.disable({ emitEvent: false });
+        } else {
+          control.enable({ emitEvent: false });
+        }
+      }
     });
   }
 

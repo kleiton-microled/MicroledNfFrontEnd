@@ -36,13 +36,6 @@ export const NFSE_ROUTES: Routes = [
           ),
       },
       {
-        path: 'consulta-lotes',
-        loadComponent: () =>
-          import('./pages/consulta-lotes/consulta-lotes-page').then(
-            (m) => m.ConsultaLotesPageComponent,
-          ),
-      },
-      {
         path: 'configuracoes-nfse',
         loadComponent: () =>
           import('./pages/configuracoes-nfse/configuracoes-nfse-page').then(

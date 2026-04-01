@@ -20,7 +20,6 @@ export class NfseSidebarComponent {
     { label: 'Consulta NFSe', route: '/nfse/consulta-nfse' },
     { label: 'Emissao NFSe', route: '/nfse/emissao-nfse' },
     { label: 'Cancelamento NFSe', route: '/nfse/cancelamento-nfse' },
-    { label: 'Consulta Lotes', route: '/nfse/consulta-lotes' },
     { label: 'Configuracoes NFSe', route: '/nfse/configuracoes-nfse' },
   ];
 }

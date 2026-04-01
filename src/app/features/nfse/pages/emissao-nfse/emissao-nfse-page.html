@@ -4,7 +4,8 @@
     <div>
       <h1 class="h2 mb-2">Geracao local de arquivo RPS</h1>
       <p class="text-secondary mb-0">
-        Preencha os dados do prestador e do RPS para testar a geracao dos arquivos locais.
+        Os dados do prestador vêm do certificado atual. Demais campos são preenchidos manualmente ou por
+        <strong>Importar RPS pendente</strong>.
       </p>
     </div>
   </header>
@@ -27,7 +28,11 @@
     <div class="card-body p-4 p-xl-5">
       <div class="d-flex flex-column gap-4">
         <section>
-          <h2 class="h4 mb-3">Prestador e periodo</h2>
+          <h2 class="h4 mb-3">Prestador (certificado)</h2>
+          <p class="text-secondary small mb-3">
+            Preenchido automaticamente pelo certificado selecionado. Com certificado ativo, estes campos ficam
+            bloqueados.
+          </p>
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorCpfCnpj">CPF/CNPJ do prestador</label>
@@ -36,7 +41,6 @@
                 class="form-control"
                 type="text"
                 formControlName="prestadorCpfCnpj"
-                [readonly]="true"
               />
             </div>
             <div class="col-12 col-md-4">
@@ -46,7 +50,6 @@
                 class="form-control"
                 type="text"
                 formControlName="prestadorInscricaoMunicipal"
-                [readonly]="facade.currentCertificate()?.inscricaoMunicipal !== null && facade.currentCertificate()?.inscricaoMunicipal !== undefined"
               />
             </div>
             <div class="col-12 col-md-4">
@@ -56,27 +59,16 @@
                 class="form-control"
                 type="text"
                 formControlName="prestadorRazaoSocial"
-                [readonly]="true"
               />
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorEmail">Email do prestador</label>
-              <input id="prestadorEmail" class="form-control" type="email" formControlName="prestadorEmail" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="dataInicio">Data inicio</label>
-              <input id="dataInicio" class="form-control" type="date" formControlName="dataInicio" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="dataFim">Data fim</label>
-              <input id="dataFim" class="form-control" type="date" formControlName="dataFim" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label d-block">Transacao</label>
-              <div class="form-check form-switch pt-2">
-                <input id="transacao" class="form-check-input" type="checkbox" formControlName="transacao" />
-                <label class="form-check-label" for="transacao">Enviar como transacao</label>
-              </div>
+              <input
+                id="prestadorEmail"
+                class="form-control"
+                type="email"
+                formControlName="prestadorEmail"
+              />
             </div>
             <div class="col-12 col-md-2">
               <label class="form-label" for="prestadorTipoLogradouro">Tipo logradouro</label>
@@ -98,7 +90,12 @@
             </div>
             <div class="col-12 col-md-2">
               <label class="form-label" for="prestadorNumero">Numero</label>
-              <input id="prestadorNumero" class="form-control" type="text" formControlName="prestadorNumero" />
+              <input
+                id="prestadorNumero"
+                class="form-control"
+                type="text"
+                formControlName="prestadorNumero"
+              />
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorComplemento">Complemento</label>
@@ -111,7 +108,12 @@
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorBairro">Bairro</label>
-              <input id="prestadorBairro" class="form-control" type="text" formControlName="prestadorBairro" />
+              <input
+                id="prestadorBairro"
+                class="form-control"
+                type="text"
+                formControlName="prestadorBairro"
+              />
             </div>
             <div class="col-12 col-md-3">
               <label class="form-label" for="prestadorCodigoMunicipio">Codigo municipio</label>
@@ -124,11 +126,40 @@
             </div>
             <div class="col-12 col-md-2">
               <label class="form-label" for="prestadorUf">UF</label>
-              <input id="prestadorUf" class="form-control" type="text" formControlName="prestadorUf" />
+              <input
+                id="prestadorUf"
+                class="form-control"
+                type="text"
+                formControlName="prestadorUf"
+              />
             </div>
             <div class="col-12 col-md-3">
               <label class="form-label" for="prestadorCep">CEP</label>
-              <input id="prestadorCep" class="form-control" type="text" formControlName="prestadorCep" />
+              <input
+                id="prestadorCep"
+                class="form-control"
+                type="text"
+                formControlName="prestadorCep"
+              />
+            </div>
+          </div>
+
+          <h3 class="h5 mt-4 mb-3">Periodo do lote</h3>
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="dataInicio">Data inicio</label>
+              <input id="dataInicio" class="form-control" type="date" formControlName="dataInicio" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="dataFim">Data fim</label>
+              <input id="dataFim" class="form-control" type="date" formControlName="dataFim" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label d-block">Transacao</label>
+              <div class="form-check form-switch pt-2">
+                <input id="transacao" class="form-check-input" type="checkbox" formControlName="transacao" />
+                <label class="form-check-label" for="transacao">Enviar como transacao</label>
+              </div>
             </div>
           </div>
         </section>
@@ -143,7 +174,6 @@
                 class="form-control"
                 type="text"
                 formControlName="inscricaoPrestador"
-                [readonly]="facade.currentCertificate()?.inscricaoMunicipal !== null && facade.currentCertificate()?.inscricaoMunicipal !== undefined"
               />
             </div>
             <div class="col-12 col-md-3">
