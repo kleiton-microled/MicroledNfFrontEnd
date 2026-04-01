@@ -75,132 +75,52 @@
     </div>
   </form>
 
-  <div class="row g-4 align-items-start">
-    <div class="col-12 col-xl-7">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-            <div>
-              <h2 class="h4 mb-1">Resultado da consulta</h2>
-              <p class="text-secondary mb-0">
-                @if (facade.hasResults()) {
-                  Consulta concluida com sucesso.
-                } @else {
-                  Resultado retornado pela API local.
-                }
-              </p>
-            </div>
-          </div>
-
-          @if (facade.errorMessage()) {
-            <div class="alert alert-warning mb-0">
-              {{ facade.errorMessage() }}
-            </div>
-          } @else if (facade.apiErrorMessages().length > 0) {
-            <div class="alert alert-danger mb-0">
-              <div class="fw-semibold mb-2">A API retornou erro(s):</div>
-              <ul class="mb-0 ps-3">
-                @for (errorMessage of facade.apiErrorMessages(); track errorMessage) {
-                  <li>{{ errorMessage }}</li>
-                }
-              </ul>
-            </div>
-          } @else if (facade.isLoading()) {
-            <div class="d-flex flex-column gap-3">
-              <div class="placeholder-glow">
-                <span class="placeholder col-12 placeholder-lg"></span>
-              </div>
-              <div class="placeholder-glow">
-                <span class="placeholder col-12"></span>
-              </div>
-              <div class="placeholder-glow">
-                <span class="placeholder col-10"></span>
-              </div>
-            </div>
-          } @else if (facade.isEmpty()) {
-            <div class="empty-state text-center py-5">
-              <h3 class="h5">Nenhuma nota encontrada</h3>
-              <p class="text-secondary mb-0">
-                Confira os dados informados e tente novamente com uma combinacao valida.
-              </p>
-            </div>
-          } @else if (!facade.hasSearched()) {
-            <div class="empty-state text-center py-5">
-              <h3 class="h5">Pronto para consultar</h3>
-              <p class="text-secondary mb-0">
-                Preencha os dados da chave da nota e clique em consultar para carregar o resultado.
-              </p>
-            </div>
-          } @else {
-            @if (facade.warningMessages().length > 0) {
-              <div class="alert alert-info">
-                <div class="fw-semibold mb-2">Alertas da consulta</div>
-                <ul class="mb-0 ps-3">
-                  @for (warningMessage of facade.warningMessages(); track warningMessage) {
-                    <li>{{ warningMessage }}</li>
-                  }
-                </ul>
-              </div>
-            }
-
-            <div class="table-responsive mt-3">
-              <table class="table table-hover align-middle mb-0">
-                <thead>
-                  <tr>
-                    <th>Numero</th>
-                    <th>Prestador</th>
-                    <th>Emissao</th>
-                    <th>Codigo verificacao</th>
-                    <th>Status</th>
-                    <th class="text-end">Servicos</th>
-                    <th class="text-end">ISS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of facade.results(); track item.numeroNFe) {
-                    <tr
-                      class="clickable-row"
-                      [class.table-active]="facade.selectedNumber() === item.numeroNFe"
-                      (click)="facade.loadDetails(item)"
-                    >
-                      <td>
-                        <div class="fw-semibold">{{ item.numeroNFe }}</div>
-                        <div class="small text-secondary">{{ item.chaveNotaNacional || '-' }}</div>
-                      </td>
-                      <td>{{ item.inscricaoPrestador }}</td>
-                      <td>
-                        {{ item.dataEmissao ? (item.dataEmissao | date: 'dd/MM/yyyy HH:mm') : '-' }}
-                      </td>
-                      <td>{{ item.codigoVerificacao }}</td>
-                      <td>
-                        <span class="badge text-bg-light border">{{ item.status || '-' }}</span>
-                      </td>
-                      <td class="text-end">
-                        {{
-                          item.valorServicos ?? item.valorTotal ?? item.valorLiquido ?? 0
-                            | currency: 'BRL' : 'symbol' : '1.2-2'
-                        }}
-                      </td>
-                      <td class="text-end">
-                        {{ item.valorISS ?? 0 | currency: 'BRL' : 'symbol' : '1.2-2' }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        </div>
+  <section class="d-flex flex-column gap-4">
+    @if (facade.errorMessage()) {
+      <div class="alert alert-warning mb-0">
+        {{ facade.errorMessage() }}
       </div>
-    </div>
+    } @else if (facade.apiErrorMessages().length > 0) {
+      <div class="alert alert-danger mb-0">
+        <div class="fw-semibold mb-2">A API retornou erro(s):</div>
+        <ul class="mb-0 ps-3">
+          @for (errorMessage of facade.apiErrorMessages(); track errorMessage) {
+            <li>{{ errorMessage }}</li>
+          }
+        </ul>
+      </div>
+    } @else if (facade.isEmpty()) {
+      <div class="empty-state text-center py-5">
+        <h3 class="h5">Nenhuma nota encontrada</h3>
+        <p class="text-secondary mb-0">
+          Confira os dados informados e tente novamente com uma combinacao valida.
+        </p>
+      </div>
+    } @else if (!facade.hasSearched()) {
+      <div class="empty-state text-center py-5">
+        <h3 class="h5">Pronto para consultar</h3>
+        <p class="text-secondary mb-0">
+          Preencha os dados da chave da nota e clique em consultar para carregar o resultado.
+        </p>
+      </div>
+    }
 
-    <div class="col-12 col-xl-5">
-      <app-consulta-nfse-detail-panel
-        [detail]="facade.selectedDetail()"
-        [loading]="facade.isDetailLoading()"
-        [errorMessage]="facade.detailErrorMessage()"
-        (closePanel)="facade.closeDetails()"
-      />
-    </div>
-  </div>
+    @if (facade.warningMessages().length > 0) {
+      <div class="alert alert-info">
+        <div class="fw-semibold mb-2">Alertas da consulta</div>
+        <ul class="mb-0 ps-3">
+          @for (warningMessage of facade.warningMessages(); track warningMessage) {
+            <li>{{ warningMessage }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <app-consulta-nfse-detail-panel
+      [detail]="facade.selectedDetail()"
+      [loading]="facade.isLoading() || facade.isDetailLoading()"
+      [errorMessage]="facade.detailErrorMessage()"
+      (closePanel)="facade.closeDetails()"
+    />
+  </section>
 </section>
