@@ -230,3 +230,66 @@ export interface OperacaoNfseResponse {
   numeroNfse?: string;
   numeroLote?: string;
 }
+
+export interface RpsArquivoPrestadorPayload {
+  cpfCnpj: string;
+  inscricaoMunicipal: number;
+  razaoSocial: string;
+}
+
+export interface RpsArquivoEnderecoPayload {
+  logradouro: string;
+  numero: string;
+  bairro: string;
+  codigoMunicipio: number;
+  uf: string;
+  cep: number;
+}
+
+export interface RpsArquivoItemPayload {
+  codigoServico: number;
+  discriminacao: string;
+  valorServicos: number;
+  valorDeducoes: number;
+  aliquotaServicos: number;
+  issRetido: boolean;
+}
+
+export interface RpsArquivoTomadorPayload {
+  cpfCnpj: string;
+  razaoSocial: string;
+  email: string;
+  endereco: RpsArquivoEnderecoPayload;
+}
+
+export interface RpsArquivoItemRpsPayload {
+  inscricaoPrestador: number;
+  serieRps: string;
+  numeroRps: number;
+  tipoRPS: string;
+  dataEmissao: string;
+  statusRPS: string;
+  tributacaoRPS: string;
+  item: RpsArquivoItemPayload;
+  tomador: RpsArquivoTomadorPayload;
+}
+
+export interface GerarArquivoRpsRequest {
+  prestador: RpsArquivoPrestadorPayload;
+  rpsList: RpsArquivoItemRpsPayload[];
+  dataInicio: string;
+  dataFim: string;
+  transacao: boolean;
+}
+
+export interface GerarArquivoRpsResponse {
+  success: boolean;
+  isSentToWebService: boolean;
+  localFilePath: string | null;
+  soapFilePath: string | null;
+  protocol: string | null;
+  message: string;
+  warnings: string[];
+  errors: string[];
+  nfeRpsKeys: string[];
+}
