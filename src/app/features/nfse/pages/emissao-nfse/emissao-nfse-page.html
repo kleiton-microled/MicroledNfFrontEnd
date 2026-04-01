@@ -9,6 +9,20 @@
     </div>
   </header>
 
+  @if (facade.currentCertificateMessage()) {
+    <div class="alert alert-warning mb-0">
+      {{ facade.currentCertificateMessage() }}
+    </div>
+  } @else if (facade.currentCertificate(); as currentCertificate) {
+    <div class="alert alert-info mb-0">
+      Certificado atual carregado:
+      <strong>{{ currentCertificate.simpleName }}</strong>
+      @if (currentCertificate.cnpj || currentCertificate.cpf) {
+        <span>({{ currentCertificate.cnpj || currentCertificate.cpf }})</span>
+      }
+    </div>
+  }
+
   <form [formGroup]="form" (ngSubmit)="generateFiles()" class="card border-0 shadow-sm">
     <div class="card-body p-4 p-xl-5">
       <div class="d-flex flex-column gap-4">
@@ -17,7 +31,13 @@
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorCpfCnpj">CPF/CNPJ do prestador</label>
-              <input id="prestadorCpfCnpj" class="form-control" type="text" formControlName="prestadorCpfCnpj" />
+              <input
+                id="prestadorCpfCnpj"
+                class="form-control"
+                type="text"
+                formControlName="prestadorCpfCnpj"
+                [readonly]="true"
+              />
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorInscricaoMunicipal">Inscricao municipal</label>
@@ -26,6 +46,7 @@
                 class="form-control"
                 type="text"
                 formControlName="prestadorInscricaoMunicipal"
+                [readonly]="facade.currentCertificate()?.inscricaoMunicipal !== null && facade.currentCertificate()?.inscricaoMunicipal !== undefined"
               />
             </div>
             <div class="col-12 col-md-4">
@@ -35,6 +56,7 @@
                 class="form-control"
                 type="text"
                 formControlName="prestadorRazaoSocial"
+                [readonly]="true"
               />
             </div>
             <div class="col-12 col-md-4">
@@ -60,7 +82,13 @@
           <div class="row g-3">
             <div class="col-12 col-md-3">
               <label class="form-label" for="inscricaoPrestador">Inscricao do prestador</label>
-              <input id="inscricaoPrestador" class="form-control" type="text" formControlName="inscricaoPrestador" />
+              <input
+                id="inscricaoPrestador"
+                class="form-control"
+                type="text"
+                formControlName="inscricaoPrestador"
+                [readonly]="facade.currentCertificate()?.inscricaoMunicipal !== null && facade.currentCertificate()?.inscricaoMunicipal !== undefined"
+              />
             </div>
             <div class="col-12 col-md-3">
               <label class="form-label" for="serieRps">Serie RPS</label>

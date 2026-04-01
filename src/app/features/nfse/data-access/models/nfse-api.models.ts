@@ -106,6 +106,8 @@ export interface CertificateResponse {
   simpleName: string;
   cnpj: string | null;
   cpf: string | null;
+  inscricaoMunicipal?: string | number | null;
+  razaoSocial?: string | null;
   isA3Candidate: boolean;
   isCurrentlySelected: boolean;
 }

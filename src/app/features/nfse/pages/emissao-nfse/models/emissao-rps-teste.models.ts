@@ -1,4 +1,4 @@
-import { GerarArquivoRpsRequest } from '../../../data-access/models/nfse-api.models';
+import { CertificateResponse, GerarArquivoRpsRequest } from '../../../data-access/models/nfse-api.models';
 
 export interface EmissaoRpsTesteFormValue {
   prestadorCpfCnpj: string;
@@ -61,6 +61,27 @@ export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
     enderecoCodigoMunicipio: '3550308',
     enderecoUf: 'SP',
     enderecoCep: '1001000',
+  };
+}
+
+export function applyCertificateToEmissaoRpsTesteFormValue(
+  currentValue: EmissaoRpsTesteFormValue,
+  certificate: CertificateResponse,
+): EmissaoRpsTesteFormValue {
+  const cpfCnpj = certificate.cnpj ?? certificate.cpf ?? currentValue.prestadorCpfCnpj;
+  const inscricaoMunicipal =
+    certificate.inscricaoMunicipal !== null && certificate.inscricaoMunicipal !== undefined
+      ? String(certificate.inscricaoMunicipal)
+      : currentValue.prestadorInscricaoMunicipal;
+  const razaoSocial =
+    certificate.razaoSocial?.trim() || certificate.simpleName?.trim() || currentValue.prestadorRazaoSocial;
+
+  return {
+    ...currentValue,
+    prestadorCpfCnpj: cpfCnpj,
+    prestadorInscricaoMunicipal: inscricaoMunicipal,
+    prestadorRazaoSocial: razaoSocial,
+    inscricaoPrestador: inscricaoMunicipal || currentValue.inscricaoPrestador,
   };
 }
 
