@@ -6,6 +6,8 @@ import { catchError } from 'rxjs/operators';
 import {
   ApiListResponse,
   CancelarNfsePayload,
+  CancelarNotaFiscalRequest,
+  CancelarNotaFiscalResponse,
   CertificateResponse,
   ConsultarStatusRpsRequest,
   ConsultarStatusRpsResponse,
@@ -32,6 +34,7 @@ import {
 import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
+  LOCAL_NFE_CANCEL_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   LOCAL_RPS_PROCESS_API_URL,
   LOCAL_RPS_STATUS_API_URL,
@@ -47,6 +50,7 @@ export class NfseApiService {
   private readonly baseUrl = inject(NFSE_API_BASE_URL);
   private readonly certificatesApiUrl = inject(CERTIFICATES_API_URL);
   private readonly certificatesSelectApiUrl = inject(CERTIFICATES_SELECT_API_URL);
+  private readonly localNfeCancelApiUrl = inject(LOCAL_NFE_CANCEL_API_URL);
   private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
   private readonly localRpsGenerateFilesApiUrl = inject(LOCAL_RPS_GENERATE_FILES_API_URL);
   private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
@@ -134,6 +138,12 @@ export class NfseApiService {
     return this.http
       .post<ConsultarNotaFiscalResponse>(this.localNfeConsultApiUrl, payload)
       .pipe(catchError((error) => this.handleError('consulta da nota fiscal', error)));
+  }
+
+  cancelarNotaFiscal(payload: CancelarNotaFiscalRequest): Observable<CancelarNotaFiscalResponse> {
+    return this.http
+      .post<CancelarNotaFiscalResponse>(this.localNfeCancelApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('cancelamento da nota fiscal', error)));
   }
 
   gerarArquivosRps(payload: GerarArquivoRpsRequest): Observable<GerarArquivoRpsResponse> {

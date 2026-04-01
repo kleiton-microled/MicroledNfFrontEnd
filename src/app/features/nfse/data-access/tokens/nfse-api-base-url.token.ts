@@ -16,6 +16,10 @@ export const LOCAL_NFE_CONSULT_API_URL = new InjectionToken<string>('LOCAL_NFE_C
   factory: () => 'http://localhost:5278/api/local/nfe/consult',
 });
 
+export const LOCAL_NFE_CANCEL_API_URL = new InjectionToken<string>('LOCAL_NFE_CANCEL_API_URL', {
+  factory: () => 'http://localhost:5278/api/local/nfe/cancel',
+});
+
 export const LOCAL_RPS_GENERATE_FILES_API_URL = new InjectionToken<string>(
   'LOCAL_RPS_GENERATE_FILES_API_URL',
   {

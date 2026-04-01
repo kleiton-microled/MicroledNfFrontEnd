@@ -129,6 +129,11 @@ export interface ConsultarNotaFiscalRequest {
   chaveNFe: ChaveNfeRequest;
 }
 
+export interface CancelarNotaFiscalRequest {
+  chaveNFe: ChaveNfeRequest;
+  transacao: boolean;
+}
+
 export interface ChaveNfeResponse {
   inscricaoPrestador?: number | string;
   numeroNFe?: number | string;
@@ -158,6 +163,15 @@ export interface ConsultarNotaFiscalResponse {
   nFeList: NotaFiscalConsultaItemResponse[];
   alertas: string[];
   erros: string[];
+}
+
+export interface CancelarNotaFiscalResponse {
+  sucesso: boolean;
+  mensagem?: string;
+  protocolo?: string | null;
+  alertas?: string[];
+  erros?: string[];
+  [key: string]: unknown;
 }
 
 export interface EnderecoPayload {
