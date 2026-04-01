@@ -123,9 +123,18 @@ export class EmissaoRpsTesteFacade {
 
   consultarStatus(): void {
     const protocol = this._protocol().trim();
+    const cnpjRemetente = this._currentCertificate()?.cnpj?.trim() ?? '';
 
     if (!protocol) {
       this._statusErrorMessage.set('Informe ou gere um protocolo antes de consultar o status.');
+      this._statusResult.set(null);
+      return;
+    }
+
+    if (!cnpjRemetente) {
+      this._statusErrorMessage.set(
+        'Nao foi encontrado um CNPJ no certificado atual para consultar o status do protocolo.',
+      );
       this._statusResult.set(null);
       return;
     }
@@ -135,7 +144,7 @@ export class EmissaoRpsTesteFacade {
     this._statusResult.set(null);
 
     this.nfseApiService
-      .consultarStatusRps({ numeroProtocolo: protocol })
+      .consultarStatusRps({ numeroProtocolo: protocol, cnpjRemetente })
       .pipe(finalize(() => this._isCheckingStatus.set(false)))
       .subscribe({
         next: (response) => {

@@ -310,6 +310,7 @@ export interface ProcessarRpsResponse {
 
 export interface ConsultarStatusRpsRequest {
   numeroProtocolo: string;
+  cnpjRemetente: string;
 }
 
 export interface ConsultarStatusRpsResponse {
