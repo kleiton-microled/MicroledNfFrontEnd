@@ -217,6 +217,17 @@
             }
             Gerar arquivos
           </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            [disabled]="facade.isProcessing()"
+            (click)="processRps()"
+          >
+            @if (facade.isProcessing()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            }
+            Enviar nota
+          </button>
           <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Restaurar exemplo</button>
         </div>
       </div>
@@ -226,6 +237,12 @@
   @if (facade.errorMessage()) {
     <div class="alert alert-warning mb-0">
       {{ facade.errorMessage() }}
+    </div>
+  }
+
+  @if (facade.processErrorMessage()) {
+    <div class="alert alert-danger mb-0">
+      {{ facade.processErrorMessage() }}
     </div>
   }
 
@@ -309,6 +326,94 @@
               <div class="result-item">
                 <div class="small text-secondary">Protocolo</div>
                 <div>{{ result.protocol || 'Nao informado' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (facade.processResult(); as processResult) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-xl-5">
+        <div class="d-flex flex-column gap-4">
+          <div>
+            <h2 class="h4 mb-2">Resultado do envio da nota</h2>
+            <p class="text-secondary mb-0">{{ processResult.message }}</p>
+          </div>
+
+          @if (processResult.warnings.length > 0) {
+            <div class="alert alert-info mb-0">
+              <div class="fw-semibold mb-2">Alertas</div>
+              <ul class="mb-0 ps-3">
+                @for (warning of processResult.warnings; track warning) {
+                  <li>{{ warning }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (processResult.errors.length > 0) {
+            <div class="alert alert-danger mb-0">
+              <div class="fw-semibold mb-2">Erros</div>
+              <ul class="mb-0 ps-3">
+                @for (error of processResult.errors; track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="result-item">
+                <div class="small text-secondary">Sucesso</div>
+                <div>{{ processResult.success ? 'Sim' : 'Nao' }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="result-item">
+                <div class="small text-secondary">Enviado ao WebService</div>
+                <div>{{ processResult.isSentToWebService ? 'Sim' : 'Nao' }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="result-item">
+                <div class="small text-secondary">Protocolo</div>
+                <div>{{ processResult.protocol || 'Nao informado' }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="result-item">
+                <div class="small text-secondary">Arquivo RPS</div>
+                <div class="text-break">{{ processResult.localFilePath || 'Nao informado' }}</div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary mt-3"
+                  [disabled]="!processResult.localFilePath"
+                  (click)="facade.openGeneratedFile(processResult.localFilePath)"
+                >
+                  Baixar arquivo RPS
+                </button>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="result-item">
+                <div class="small text-secondary">Arquivo SOAP</div>
+                <div class="text-break">{{ processResult.soapFilePath || 'Nao informado' }}</div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary mt-3"
+                  [disabled]="!processResult.soapFilePath"
+                  (click)="facade.openGeneratedFile(processResult.soapFilePath)"
+                >
+                  Baixar arquivo SOAP
+                </button>
               </div>
             </div>
           </div>

@@ -23,6 +23,7 @@ import {
   NfseQueryFilters,
   NfseResumoResponse,
   OperacaoNfseResponse,
+  ProcessarRpsResponse,
   QueryParamValue,
   SelectCertificatePayload,
 } from '../models/nfse-api.models';
@@ -30,6 +31,7 @@ import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
+  LOCAL_RPS_PROCESS_API_URL,
   LOCAL_RPS_GENERATE_FILES_API_URL,
   NFSE_API_BASE_URL,
 } from '../tokens/nfse-api-base-url.token';
@@ -44,6 +46,7 @@ export class NfseApiService {
   private readonly certificatesSelectApiUrl = inject(CERTIFICATES_SELECT_API_URL);
   private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
   private readonly localRpsGenerateFilesApiUrl = inject(LOCAL_RPS_GENERATE_FILES_API_URL);
+  private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -133,6 +136,12 @@ export class NfseApiService {
     return this.http
       .post<GerarArquivoRpsResponse>(this.localRpsGenerateFilesApiUrl, payload)
       .pipe(catchError((error) => this.handleError('geracao de arquivos RPS', error)));
+  }
+
+  processarRps(payload: GerarArquivoRpsRequest): Observable<ProcessarRpsResponse> {
+    return this.http
+      .post<ProcessarRpsResponse>(this.localRpsProcessApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('envio da nota', error)));
   }
 
   emitirRps(payload: EmitirRpsPayload): Observable<OperacaoNfseResponse> {

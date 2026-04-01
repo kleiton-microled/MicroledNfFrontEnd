@@ -6,6 +6,7 @@ import {
   GerarArquivoRpsRequest,
   GerarArquivoRpsResponse,
   NfseApiError,
+  ProcessarRpsResponse,
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
 
@@ -16,6 +17,9 @@ export class EmissaoRpsTesteFacade {
   private readonly _isLoading = signal(false);
   private readonly _errorMessage = signal<string | null>(null);
   private readonly _result = signal<GerarArquivoRpsResponse | null>(null);
+  private readonly _isProcessing = signal(false);
+  private readonly _processErrorMessage = signal<string | null>(null);
+  private readonly _processResult = signal<ProcessarRpsResponse | null>(null);
   private readonly _currentCertificate = signal<CertificateResponse | null>(null);
   private readonly _loadingCurrentCertificate = signal(false);
   private readonly _currentCertificateMessage = signal<string | null>(null);
@@ -23,6 +27,9 @@ export class EmissaoRpsTesteFacade {
   readonly isLoading = this._isLoading.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
   readonly result = this._result.asReadonly();
+  readonly isProcessing = this._isProcessing.asReadonly();
+  readonly processErrorMessage = this._processErrorMessage.asReadonly();
+  readonly processResult = this._processResult.asReadonly();
   readonly currentCertificate = this._currentCertificate.asReadonly();
   readonly loadingCurrentCertificate = this._loadingCurrentCertificate.asReadonly();
   readonly currentCertificateMessage = this._currentCertificateMessage.asReadonly();
@@ -77,6 +84,29 @@ export class EmissaoRpsTesteFacade {
       });
   }
 
+  processRps(payload: GerarArquivoRpsRequest): void {
+    this._isProcessing.set(true);
+    this._processErrorMessage.set(null);
+    this._processResult.set(null);
+
+    this.nfseApiService
+      .processarRps(payload)
+      .pipe(finalize(() => this._isProcessing.set(false)))
+      .subscribe({
+        next: (response) => {
+          this._processResult.set(response);
+
+          if (!response.success) {
+            this._processErrorMessage.set(response.errors[0] ?? response.message);
+          }
+        },
+        error: (error: unknown) => {
+          this._processResult.set(null);
+          this._processErrorMessage.set(this.getProcessErrorMessage(error));
+        },
+      });
+  }
+
   openGeneratedFile(path: string | null): void {
     if (!path) {
       return;
@@ -102,6 +132,14 @@ export class EmissaoRpsTesteFacade {
     }
 
     return 'Nao foi possivel gerar os arquivos RPS.';
+  }
+
+  private getProcessErrorMessage(error: unknown): string {
+    if (error instanceof NfseApiError) {
+      return error.message;
+    }
+
+    return 'Nao foi possivel enviar a nota.';
   }
 
   private getCurrentCertificateMessage(error: unknown): string {

@@ -295,3 +295,15 @@ export interface GerarArquivoRpsResponse {
   errors: string[];
   nfeRpsKeys: string[];
 }
+
+export interface ProcessarRpsResponse {
+  success: boolean;
+  isSentToWebService: boolean;
+  localFilePath: string | null;
+  soapFilePath: string | null;
+  protocol: string | null;
+  message: string;
+  warnings: string[];
+  errors: string[];
+  nfeRpsKeys: string[];
+}

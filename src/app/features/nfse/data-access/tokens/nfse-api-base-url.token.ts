@@ -22,3 +22,7 @@ export const LOCAL_RPS_GENERATE_FILES_API_URL = new InjectionToken<string>(
     factory: () => 'http://localhost:5278/api/local/rps/generate-files',
   },
 );
+
+export const LOCAL_RPS_PROCESS_API_URL = new InjectionToken<string>('LOCAL_RPS_PROCESS_API_URL', {
+  factory: () => 'http://localhost:5278/api/local/rps/process',
+});
