@@ -1,6 +1,7 @@
 import {
   ConsultarNotaFiscalRequest,
   ConsultarNotaFiscalResponse,
+  NotaFiscalConsultaItemResponse,
 } from '../../../data-access/models/nfse-api.models';
 
 export interface ConsultaNfseFiltersFormValue {
@@ -16,16 +17,21 @@ export interface ConsultaNfseResultadoItem {
   codigoVerificacao: string;
   chaveNotaNacional?: string;
   dataEmissao?: string;
+  dataFatoGerador?: string;
   status?: string;
   valorTotal?: number;
   valorServicos?: number;
+  valorDeducoes?: number;
+  valorISS?: number;
   valorLiquido?: number;
 }
 
 export interface ConsultaNfseSearchState {
   items: ConsultaNfseResultadoItem[];
   total: number;
-  autoSelectedDetail?: ConsultarNotaFiscalResponse;
+  alertas: string[];
+  erros: string[];
+  autoSelectedDetail?: NotaFiscalConsultaItemResponse;
 }
 
 export function mapConsultaRequest(filters: ConsultaNfseFiltersFormValue): ConsultarNotaFiscalRequest {
@@ -40,31 +46,48 @@ export function mapConsultaRequest(filters: ConsultaNfseFiltersFormValue): Consu
 }
 
 export function mapConsultaResponseToResultadoItem(
-  response: ConsultarNotaFiscalResponse,
+  response: NotaFiscalConsultaItemResponse,
   request: ConsultarNotaFiscalRequest,
 ): ConsultaNfseResultadoItem {
   return {
-    numeroNFe: resolveStringValue(response, ['numeroNFe', 'numeroNfse']) ?? String(request.chaveNFe.numeroNFe),
+    numeroNFe:
+      resolveStringValue(response.chaveNFe, ['numeroNFe']) ??
+      resolveStringValue(response, ['numeroNfse']) ??
+      String(request.chaveNFe.numeroNFe),
     inscricaoPrestador:
-      resolveStringValue(response, ['inscricaoPrestador']) ?? String(request.chaveNFe.inscricaoPrestador),
+      resolveStringValue(response.chaveNFe, ['inscricaoPrestador']) ??
+      String(request.chaveNFe.inscricaoPrestador),
     codigoVerificacao:
-      resolveStringValue(response, ['codigoVerificacao']) ?? request.chaveNFe.codigoVerificacao,
+      resolveStringValue(response, ['codigoVerificacao']) ??
+      resolveStringValue(response.chaveNFe, ['codigoVerificacao']) ??
+      request.chaveNFe.codigoVerificacao,
     chaveNotaNacional:
-      resolveStringValue(response, ['chaveNotaNacional']) ?? request.chaveNFe.chaveNotaNacional ?? undefined,
+      resolveStringValue(response.chaveNFe, ['chaveNotaNacional']) ??
+      request.chaveNFe.chaveNotaNacional ??
+      undefined,
     dataEmissao: resolveStringValue(response, ['dataEmissao']),
+    dataFatoGerador: resolveStringValue(response, ['dataFatoGerador']),
     status: resolveStringValue(response, ['status']),
     valorTotal: resolveNumberValue(response, ['valorTotal']),
     valorServicos: resolveNumberValue(response, ['valorServicos']),
+    valorDeducoes: resolveNumberValue(response, ['valorDeducoes']),
+    valorISS: resolveNumberValue(response, ['valorISS']),
     valorLiquido: resolveNumberValue(response, ['valorLiquido']),
   };
 }
 
 function resolveStringValue(
-  source: ConsultarNotaFiscalResponse,
+  source: object | undefined,
   keys: string[],
 ): string | undefined {
+  if (!source) {
+    return undefined;
+  }
+
+  const sourceRecord = source as Record<string, unknown>;
+
   for (const key of keys) {
-    const value = source[key];
+    const value = sourceRecord[key];
 
     if (typeof value === 'string' && value.trim().length > 0) {
       return value;
@@ -79,11 +102,17 @@ function resolveStringValue(
 }
 
 function resolveNumberValue(
-  source: ConsultarNotaFiscalResponse,
+  source: object | undefined,
   keys: string[],
 ): number | undefined {
+  if (!source) {
+    return undefined;
+  }
+
+  const sourceRecord = source as Record<string, unknown>;
+
   for (const key of keys) {
-    const value = source[key];
+    const value = sourceRecord[key];
 
     if (typeof value === 'number') {
       return value;

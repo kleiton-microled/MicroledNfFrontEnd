@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
@@ -8,7 +8,7 @@ import { ConsultaNfseFacade } from './facades/consulta-nfse.facade';
 @Component({
   selector: 'app-consulta-nfse-page',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, ConsultaNfseDetailPanelComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, ConsultaNfseDetailPanelComponent],
   templateUrl: './consulta-nfse-page.html',
   styleUrl: './consulta-nfse-page.scss',
   providers: [ConsultaNfseFacade],

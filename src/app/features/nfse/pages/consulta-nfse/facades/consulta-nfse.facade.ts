@@ -3,7 +3,7 @@ import { finalize, map, Observable } from 'rxjs';
 
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
 import {
-  ConsultarNotaFiscalResponse,
+  NotaFiscalConsultaItemResponse,
   NfseApiError,
 } from '../../../data-access/models/nfse-api.models';
 import {
@@ -24,8 +24,10 @@ export class ConsultaNfseFacade {
   private readonly _isDetailLoading = signal(false);
   private readonly _hasSearched = signal(false);
   private readonly _errorMessage = signal<string | null>(null);
+  private readonly _warningMessages = signal<string[]>([]);
+  private readonly _apiErrorMessages = signal<string[]>([]);
   private readonly _detailErrorMessage = signal<string | null>(null);
-  private readonly _selectedDetail = signal<ConsultarNotaFiscalResponse | null>(null);
+  private readonly _selectedDetail = signal<NotaFiscalConsultaItemResponse | null>(null);
   private readonly _selectedNumber = signal<string | null>(null);
 
   readonly results = this._results.asReadonly();
@@ -34,6 +36,8 @@ export class ConsultaNfseFacade {
   readonly isDetailLoading = this._isDetailLoading.asReadonly();
   readonly hasSearched = this._hasSearched.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
+  readonly warningMessages = this._warningMessages.asReadonly();
+  readonly apiErrorMessages = this._apiErrorMessages.asReadonly();
   readonly detailErrorMessage = this._detailErrorMessage.asReadonly();
   readonly selectedDetail = this._selectedDetail.asReadonly();
   readonly selectedNumber = this._selectedNumber.asReadonly();
@@ -53,6 +57,8 @@ export class ConsultaNfseFacade {
       this._total.set(0);
       this._selectedDetail.set(null);
       this._selectedNumber.set(null);
+      this._warningMessages.set([]);
+      this._apiErrorMessages.set([]);
       this._errorMessage.set(
         'Informe inscricao do prestador, numero da nota e codigo de verificacao para realizar a consulta.',
       );
@@ -63,6 +69,8 @@ export class ConsultaNfseFacade {
     this._isLoading.set(true);
     this._hasSearched.set(true);
     this._errorMessage.set(null);
+    this._warningMessages.set([]);
+    this._apiErrorMessages.set([]);
     this._detailErrorMessage.set(null);
     this._selectedDetail.set(null);
     this._selectedNumber.set(null);
@@ -73,6 +81,8 @@ export class ConsultaNfseFacade {
         next: (state) => {
           this._results.set(state.items);
           this._total.set(state.total);
+          this._warningMessages.set(state.alertas);
+          this._apiErrorMessages.set(state.erros);
 
           if (state.autoSelectedDetail) {
             this._selectedDetail.set(state.autoSelectedDetail);
@@ -84,6 +94,8 @@ export class ConsultaNfseFacade {
           this._total.set(0);
           this._selectedDetail.set(null);
           this._selectedNumber.set(null);
+          this._warningMessages.set([]);
+          this._apiErrorMessages.set([]);
           this._errorMessage.set(this.getFriendlyErrorMessage(error));
         },
       });
@@ -114,8 +126,10 @@ export class ConsultaNfseFacade {
       .consultarNotaFiscal(payload)
       .pipe(finalize(() => this._isDetailLoading.set(false)))
       .subscribe({
-        next: (detail) => {
-          this._selectedDetail.set(detail);
+        next: (response) => {
+          this._selectedDetail.set(response.nFeList[0] ?? null);
+          this._warningMessages.set(response.alertas);
+          this._apiErrorMessages.set(response.erros);
         },
         error: (error: unknown) => {
           this._selectedDetail.set(null);
@@ -135,6 +149,8 @@ export class ConsultaNfseFacade {
     this._total.set(0);
     this._hasSearched.set(false);
     this._errorMessage.set(null);
+    this._warningMessages.set([]);
+    this._apiErrorMessages.set([]);
     this._detailErrorMessage.set(null);
     this._selectedDetail.set(null);
     this._selectedNumber.set(null);
@@ -146,11 +162,17 @@ export class ConsultaNfseFacade {
     const payload = mapConsultaRequest(filters);
 
     return this.nfseApiService.consultarNotaFiscal(payload).pipe(
-      map((detail) => ({
-        items: [mapConsultaResponseToResultadoItem(detail, payload)],
-        total: 1,
-        autoSelectedDetail: detail,
-      })),
+      map((response) => {
+        const items = response.nFeList.map((item) => mapConsultaResponseToResultadoItem(item, payload));
+
+        return {
+          items,
+          total: items.length,
+          alertas: response.alertas,
+          erros: response.erros,
+          autoSelectedDetail: response.nFeList[0],
+        };
+      }),
     );
   }
 

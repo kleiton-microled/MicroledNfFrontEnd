@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe, KeyValuePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 
-import { ConsultarNotaFiscalResponse } from '../../../../data-access/models/nfse-api.models';
+import { NotaFiscalConsultaItemResponse } from '../../../../data-access/models/nfse-api.models';
 
 @Component({
   selector: 'app-consulta-nfse-detail-panel',
@@ -11,36 +11,40 @@ import { ConsultarNotaFiscalResponse } from '../../../../data-access/models/nfse
   styleUrl: './consulta-nfse-detail-panel.scss',
 })
 export class ConsultaNfseDetailPanelComponent {
-  readonly detail = input<ConsultarNotaFiscalResponse | null>(null);
+  readonly detail = input<NotaFiscalConsultaItemResponse | null>(null);
   readonly loading = input(false);
   readonly errorMessage = input<string | null>(null);
   readonly closePanel = output<void>();
 
   protected readonly summaryKeys = [
-    'numeroNFe',
-    'numeroNfse',
-    'inscricaoPrestador',
-    'codigoVerificacao',
-    'chaveNotaNacional',
     'status',
     'dataEmissao',
+    'dataFatoGerador',
     'valorTotal',
     'valorServicos',
+    'valorDeducoes',
+    'valorISS',
     'valorLiquido',
   ];
 
-  protected getSummaryEntries(detail: ConsultarNotaFiscalResponse): Array<{ key: string; value: unknown }> {
-    return this.summaryKeys
-      .map((key) => ({ key, value: detail[key] }))
-      .filter((entry) => entry.value !== null && entry.value !== undefined && entry.value !== '');
+  protected getSummaryEntries(detail: NotaFiscalConsultaItemResponse): Array<{ key: string; value: unknown }> {
+    return [
+      { key: 'inscricaoPrestador', value: detail.chaveNFe?.inscricaoPrestador },
+      { key: 'numeroNFe', value: detail.chaveNFe?.numeroNFe },
+      { key: 'codigoVerificacao', value: detail['codigoVerificacao'] ?? detail.chaveNFe?.codigoVerificacao },
+      { key: 'chaveNotaNacional', value: detail.chaveNFe?.chaveNotaNacional },
+      ...this.summaryKeys
+        .map((key) => ({ key, value: detail[key] })),
+    ].filter((entry) => entry.value !== null && entry.value !== undefined && entry.value !== '');
   }
 
   protected getObjectSections(
-    detail: ConsultarNotaFiscalResponse,
+    detail: NotaFiscalConsultaItemResponse,
   ): Array<{ key: string; value: Record<string, unknown> }> {
     return Object.entries(detail)
       .filter(
         ([key, value]) =>
+          key !== 'chaveNFe' &&
           !this.summaryKeys.includes(key) &&
           typeof value === 'object' &&
           value !== null &&
@@ -73,7 +77,7 @@ export class ConsultaNfseDetailPanelComponent {
   }
 
   protected isDateField(key: string): boolean {
-    return key === 'dataEmissao';
+    return key === 'dataEmissao' || key === 'dataFatoGerador';
   }
 
   protected getNumericValue(value: unknown): number | null {

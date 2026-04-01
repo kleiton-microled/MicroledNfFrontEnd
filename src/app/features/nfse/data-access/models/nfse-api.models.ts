@@ -127,21 +127,34 @@ export interface ConsultarNotaFiscalRequest {
   chaveNFe: ChaveNfeRequest;
 }
 
-export interface ConsultarNotaFiscalResponse {
+export interface ChaveNfeResponse {
+  inscricaoPrestador?: number | string;
   numeroNFe?: number | string;
-  numeroNfse?: number | string;
   codigoVerificacao?: string;
   chaveNotaNacional?: string | null;
-  inscricaoPrestador?: number | string;
+}
+
+export interface NotaFiscalConsultaItemResponse {
+  chaveNFe?: ChaveNfeResponse;
   dataEmissao?: string;
+  dataFatoGerador?: string;
   status?: string;
   valorTotal?: number;
   valorServicos?: number;
+  valorDeducoes?: number;
+  valorISS?: number;
   valorLiquido?: number;
   prestador?: Record<string, unknown>;
   tomador?: Record<string, unknown>;
   servico?: Record<string, unknown>;
   [key: string]: unknown;
+}
+
+export interface ConsultarNotaFiscalResponse {
+  sucesso: boolean;
+  nFeList: NotaFiscalConsultaItemResponse[];
+  alertas: string[];
+  erros: string[];
 }
 
 export interface EnderecoPayload {
