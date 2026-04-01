@@ -397,6 +397,91 @@ export interface ProcessarRpsResponse {
   nfeRpsKeys: string[];
 }
 
+/** Item de `rpsList` no retorno de GET /api/local/access/pending-rps (API pode enviar nulls). */
+export interface PendingRpsApiItem {
+  inscricaoPrestador?: number;
+  serieRps?: string;
+  numeroRps?: number;
+  tipoRPS?: string;
+  dataEmissao?: string;
+  statusRPS?: string;
+  tributacaoRPS?: string;
+  item?: {
+    codigoServico?: number;
+    discriminacao?: string;
+    valorServicos?: number;
+    valorDeducoes?: number;
+    aliquotaServicos?: number;
+    issRetido?: boolean;
+  };
+  tomador?: {
+    cpfCnpj?: string;
+    inscricaoMunicipal?: number | null;
+    inscricaoEstadual?: number | null;
+    razaoSocial?: string;
+    email?: string | null;
+    endereco?: RpsArquivoEnderecoPayload | null;
+  };
+  tributos?: {
+    valorPIS?: number | null;
+    valorCOFINS?: number | null;
+    valorINSS?: number | null;
+    valorIR?: number | null;
+    valorCSLL?: number | null;
+    valorIPI?: number | null;
+    valorCargaTributaria?: number | null;
+    percentualCargaTributaria?: number | null;
+    fonteCargaTributaria?: string | null;
+    valorTotalRecebido?: number | null;
+    valorFinalCobrado?: number | null;
+    valorMulta?: number | null;
+    valorJuros?: number | null;
+    ncm?: string | null;
+  };
+  ibsCbs?: {
+    finNFSe?: number | null;
+    indFinal?: number | null;
+    cIndOp?: string | null;
+    tpOper?: string | null;
+    refNfSe?: string[] | null;
+    tpEnteGov?: string | null;
+    indDest?: number | null;
+    dest?: {
+      cpfCnpj?: string;
+      nif?: string | null;
+      naoNif?: string | null;
+      razaoSocial?: string;
+      email?: string | null;
+      endereco?: RpsArquivoEnderecoPayload | null;
+    };
+    cClassTrib?: string | null;
+    cClassTribReg?: string | null;
+    nbs?: string | null;
+    cLocPrestacao?: number | null;
+    imovelObra?: ProcessarRpsIbsCbsImovelObraPayload | null;
+  };
+}
+
+export interface PendingRpsApiRequest {
+  prestador?: {
+    cpfCnpj?: string;
+    inscricaoMunicipal?: number;
+    razaoSocial?: string;
+    email?: string | null;
+    endereco?: RpsArquivoEnderecoPayload | null;
+  };
+  rpsList?: PendingRpsApiItem[];
+  dataInicio?: string;
+  dataFim?: string;
+  transacao?: boolean;
+}
+
+export interface PendingRpsResponse {
+  count: number;
+  recordIds: number[];
+  request: PendingRpsApiRequest | null;
+}
+
 export interface ConsultarStatusRpsRequest {
   numeroProtocolo: string;
   cnpjRemetente: string;

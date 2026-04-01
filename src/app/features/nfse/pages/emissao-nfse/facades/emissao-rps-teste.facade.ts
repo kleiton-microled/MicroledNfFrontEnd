@@ -11,6 +11,10 @@ import {
   ProcessarRpsResponse,
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
+import {
+  EmissaoRpsTesteFormValue,
+  mapPendingRpsResponseToEmissaoRpsTesteFormValue,
+} from '../models/emissao-rps-teste.models';
 
 @Injectable()
 export class EmissaoRpsTesteFacade {
@@ -29,6 +33,8 @@ export class EmissaoRpsTesteFacade {
   private readonly _currentCertificate = signal<CertificateResponse | null>(null);
   private readonly _loadingCurrentCertificate = signal(false);
   private readonly _currentCertificateMessage = signal<string | null>(null);
+  private readonly _isImportingPending = signal(false);
+  private readonly _importPendingErrorMessage = signal<string | null>(null);
 
   readonly isLoading = this._isLoading.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
@@ -43,6 +49,8 @@ export class EmissaoRpsTesteFacade {
   readonly currentCertificate = this._currentCertificate.asReadonly();
   readonly loadingCurrentCertificate = this._loadingCurrentCertificate.asReadonly();
   readonly currentCertificateMessage = this._currentCertificateMessage.asReadonly();
+  readonly isImportingPending = this._isImportingPending.asReadonly();
+  readonly importPendingErrorMessage = this._importPendingErrorMessage.asReadonly();
 
   loadCurrentCertificate(): void {
     this._loadingCurrentCertificate.set(true);
@@ -67,6 +75,32 @@ export class EmissaoRpsTesteFacade {
         error: (error: unknown) => {
           this._currentCertificate.set(null);
           this._currentCertificateMessage.set(this.getCurrentCertificateMessage(error));
+        },
+      });
+  }
+
+  importPendingRps(
+    currentForm: EmissaoRpsTesteFormValue,
+    onMapped: (value: EmissaoRpsTesteFormValue) => void,
+  ): void {
+    this._isImportingPending.set(true);
+    this._importPendingErrorMessage.set(null);
+
+    this.nfseApiService
+      .obterPendingRps()
+      .pipe(finalize(() => this._isImportingPending.set(false)))
+      .subscribe({
+        next: (response) => {
+          if (response.count === 0 || !response.request?.rpsList?.length) {
+            this._importPendingErrorMessage.set('Nao ha RPS pendente para importar.');
+            return;
+          }
+
+          const mapped = mapPendingRpsResponseToEmissaoRpsTesteFormValue(response, currentForm);
+          onMapped(mapped);
+        },
+        error: (error: unknown) => {
+          this._importPendingErrorMessage.set(this.getImportPendingErrorMessage(error));
         },
       });
   }
@@ -210,5 +244,13 @@ export class EmissaoRpsTesteFacade {
     }
 
     return 'Nao foi possivel carregar o certificado atual.';
+  }
+
+  private getImportPendingErrorMessage(error: unknown): string {
+    if (error instanceof NfseApiError) {
+      return error.message;
+    }
+
+    return 'Nao foi possivel importar o RPS pendente.';
   }
 }

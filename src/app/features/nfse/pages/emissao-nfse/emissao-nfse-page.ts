@@ -68,4 +68,8 @@ export class EmissaoNfsePageComponent implements OnInit {
         : defaultValue,
     );
   }
+
+  protected importPendingRps(): void {
+    this.facade.importPendingRps(this.form.getRawValue(), (value) => this.form.patchValue(value));
+  }
 }

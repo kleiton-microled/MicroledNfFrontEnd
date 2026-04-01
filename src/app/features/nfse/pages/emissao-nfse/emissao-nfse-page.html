@@ -525,11 +525,28 @@
             }
             Consultar status
           </button>
+          <button
+            type="button"
+            class="btn btn-outline-info"
+            [disabled]="facade.isImportingPending()"
+            (click)="importPendingRps()"
+          >
+            @if (facade.isImportingPending()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            }
+            Importar RPS pendente
+          </button>
           <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Restaurar exemplo</button>
         </div>
       </div>
     </div>
   </form>
+
+  @if (facade.importPendingErrorMessage()) {
+    <div class="alert alert-warning mb-0">
+      {{ facade.importPendingErrorMessage() }}
+    </div>
+  }
 
   @if (facade.errorMessage()) {
     <div class="alert alert-warning mb-0">

@@ -27,6 +27,7 @@ import {
   NfseQueryFilters,
   NfseResumoResponse,
   OperacaoNfseResponse,
+  PendingRpsResponse,
   ProcessarRpsRequest,
   ProcessarRpsResponse,
   QueryParamValue,
@@ -35,6 +36,7 @@ import {
 import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
+  LOCAL_ACCESS_PENDING_RPS_API_URL,
   LOCAL_NFE_CANCEL_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   LOCAL_RPS_PROCESS_API_URL,
@@ -56,6 +58,7 @@ export class NfseApiService {
   private readonly localRpsGenerateFilesApiUrl = inject(LOCAL_RPS_GENERATE_FILES_API_URL);
   private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
   private readonly localRpsStatusApiUrl = inject(LOCAL_RPS_STATUS_API_URL);
+  private readonly localAccessPendingRpsApiUrl = inject(LOCAL_ACCESS_PENDING_RPS_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -127,6 +130,12 @@ export class NfseApiService {
     return this.http
       .get<CertificateResponse[]>(this.certificatesApiUrl)
       .pipe(catchError((error) => this.handleError('consulta de certificados disponiveis', error)));
+  }
+
+  obterPendingRps(): Observable<PendingRpsResponse> {
+    return this.http
+      .get<PendingRpsResponse>(this.localAccessPendingRpsApiUrl)
+      .pipe(catchError((error) => this.handleError('consulta de RPS pendente', error)));
   }
 
   selecionarCertificado(payload: SelectCertificatePayload): Observable<void> {

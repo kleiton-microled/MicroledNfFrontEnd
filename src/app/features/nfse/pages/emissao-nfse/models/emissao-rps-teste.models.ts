@@ -1,7 +1,9 @@
 import {
   CertificateResponse,
   GerarArquivoRpsRequest,
+  PendingRpsResponse,
   ProcessarRpsRequest,
+  RpsArquivoEnderecoPayload,
 } from '../../../data-access/models/nfse-api.models';
 
 export interface EmissaoRpsTesteFormValue {
@@ -151,6 +153,92 @@ export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
     ibsImovelInscricaoImobiliariaFiscal: '',
     ibsImovelCCib: '',
     ibsImovelCObra: '',
+  };
+}
+
+export function mapPendingRpsResponseToEmissaoRpsTesteFormValue(
+  response: PendingRpsResponse,
+  base: EmissaoRpsTesteFormValue,
+): EmissaoRpsTesteFormValue {
+  const req = response.request;
+  if (!req?.rpsList?.length) {
+    return base;
+  }
+
+  const rps = req.rpsList[0];
+  const prest = req.prestador;
+  const tom = rps.tomador;
+  const item = rps.item;
+  const trib = rps.tributos;
+  const ibs = rps.ibsCbs;
+  const dest = ibs?.dest;
+  const imovel = ibs?.imovelObra;
+
+  const pe = prest?.endereco ?? null;
+  const te = tom?.endereco ?? dest?.endereco ?? imovel?.endereco ?? null;
+
+  return {
+    ...base,
+    ...mapApiEnderecoToPrestadorForm(pe),
+    prestadorCpfCnpj: formatDigits(prest?.cpfCnpj) || base.prestadorCpfCnpj,
+    prestadorInscricaoMunicipal: numToStr(prest?.inscricaoMunicipal) || base.prestadorInscricaoMunicipal,
+    prestadorRazaoSocial: prest?.razaoSocial?.trim() || base.prestadorRazaoSocial,
+    prestadorEmail: sanitizeEmail(prest?.email) || base.prestadorEmail,
+    dataInicio: req.dataInicio ?? base.dataInicio,
+    dataFim: req.dataFim ?? base.dataFim,
+    transacao: req.transacao ?? base.transacao,
+    inscricaoPrestador: numToStr(rps.inscricaoPrestador) || base.inscricaoPrestador,
+    serieRps: rps.serieRps ?? base.serieRps,
+    numeroRps: numToStr(rps.numeroRps) || base.numeroRps,
+    tipoRps: rps.tipoRPS ?? base.tipoRps,
+    dataEmissao: rps.dataEmissao ?? base.dataEmissao,
+    statusRps: rps.statusRPS ?? base.statusRps,
+    tributacaoRps: rps.tributacaoRPS ?? base.tributacaoRps,
+    codigoServico: numToStr(item?.codigoServico) || base.codigoServico,
+    discriminacao: item?.discriminacao ?? base.discriminacao,
+    valorServicos: formatOptionalNumber(item?.valorServicos),
+    valorDeducoes: formatOptionalNumber(item?.valorDeducoes),
+    aliquotaServicos: formatOptionalNumber(item?.aliquotaServicos),
+    issRetido: item?.issRetido ?? base.issRetido,
+    tomadorCpfCnpj: formatDigits(tom?.cpfCnpj) || base.tomadorCpfCnpj,
+    tomadorInscricaoMunicipal:
+      tom?.inscricaoMunicipal != null ? String(tom.inscricaoMunicipal) : base.tomadorInscricaoMunicipal,
+    tomadorInscricaoEstadual:
+      tom?.inscricaoEstadual != null ? String(tom.inscricaoEstadual) : base.tomadorInscricaoEstadual,
+    tomadorRazaoSocial: tom?.razaoSocial ?? dest?.razaoSocial ?? base.tomadorRazaoSocial,
+    tomadorEmail:
+      sanitizeEmail(tom?.email) || sanitizeEmail(dest?.email) || base.tomadorEmail,
+    ...mapApiEnderecoToTomadorForm(te),
+    tributosValorPIS: formatOptionalNumber(trib?.valorPIS),
+    tributosValorCOFINS: formatOptionalNumber(trib?.valorCOFINS),
+    tributosValorINSS: formatOptionalNumber(trib?.valorINSS),
+    tributosValorIR: formatOptionalNumber(trib?.valorIR),
+    tributosValorCSLL: formatOptionalNumber(trib?.valorCSLL),
+    tributosValorIPI: formatOptionalNumber(trib?.valorIPI),
+    tributosValorCargaTributaria: formatOptionalNumber(trib?.valorCargaTributaria),
+    tributosPercentualCargaTributaria: formatOptionalNumber(trib?.percentualCargaTributaria),
+    tributosFonteCargaTributaria: trib?.fonteCargaTributaria?.trim() ?? base.tributosFonteCargaTributaria,
+    tributosValorTotalRecebido: formatOptionalNumber(trib?.valorTotalRecebido),
+    tributosValorFinalCobrado: formatOptionalNumber(trib?.valorFinalCobrado),
+    tributosValorMulta: formatOptionalNumber(trib?.valorMulta),
+    tributosValorJuros: formatOptionalNumber(trib?.valorJuros),
+    tributosNcm: trib?.ncm?.trim() ?? base.tributosNcm,
+    ibsFinNFSe: ibs?.finNFSe != null ? String(ibs.finNFSe) : base.ibsFinNFSe,
+    ibsIndFinal: ibs?.indFinal != null ? String(ibs.indFinal) : base.ibsIndFinal,
+    ibsCIndOp: ibs?.cIndOp?.trim() ?? base.ibsCIndOp,
+    ibsTpOper: ibs?.tpOper?.trim() ?? '',
+    ibsRefNfSe: Array.isArray(ibs?.refNfSe) ? ibs.refNfSe.join('\n') : base.ibsRefNfSe,
+    ibsTpEnteGov: ibs?.tpEnteGov?.trim() ?? '',
+    ibsIndDest: ibs?.indDest != null ? String(ibs.indDest) : base.ibsIndDest,
+    ibsDestNif: dest?.nif != null ? String(dest.nif) : '',
+    ibsDestNaoNif: dest?.naoNif != null ? String(dest.naoNif) : '',
+    ibsCClassTrib: ibs?.cClassTrib?.trim() ?? base.ibsCClassTrib,
+    ibsCClassTribReg: ibs?.cClassTribReg?.trim() ?? '',
+    ibsNbs: ibs?.nbs?.trim() ?? '',
+    ibsCLocPrestacao: ibs?.cLocPrestacao != null ? String(ibs.cLocPrestacao) : '',
+    ibsImovelInscricaoImobiliariaFiscal: imovel?.inscricaoImobiliariaFiscal?.trim() ?? '',
+    ibsImovelCCib: imovel?.cCib?.trim() ?? '',
+    ibsImovelCObra: imovel?.cObra?.trim() ?? '',
   };
 }
 
@@ -364,4 +452,74 @@ function parseDecimal(value: string): number {
   }
 
   return Number(sanitized);
+}
+
+function mapApiEnderecoToPrestadorForm(
+  e: RpsArquivoEnderecoPayload | null,
+): Partial<EmissaoRpsTesteFormValue> {
+  if (!e) {
+    return {};
+  }
+
+  return {
+    prestadorTipoLogradouro: e.tipoLogradouro ?? '',
+    prestadorLogradouro: e.logradouro ?? '',
+    prestadorNumero: e.numero ?? '',
+    prestadorComplemento: e.complemento ?? '',
+    prestadorBairro: e.bairro ?? '',
+    prestadorCodigoMunicipio: e.codigoMunicipio != null ? String(e.codigoMunicipio) : '',
+    prestadorUf: e.uf ?? '',
+    prestadorCep: e.cep != null ? String(e.cep) : '',
+  };
+}
+
+function mapApiEnderecoToTomadorForm(
+  e: RpsArquivoEnderecoPayload | null,
+): Partial<EmissaoRpsTesteFormValue> {
+  if (!e) {
+    return {};
+  }
+
+  return {
+    enderecoTipoLogradouro: e.tipoLogradouro ?? '',
+    enderecoLogradouro: e.logradouro ?? '',
+    enderecoNumero: e.numero ?? '',
+    enderecoComplemento: e.complemento ?? '',
+    enderecoBairro: e.bairro ?? '',
+    enderecoCodigoMunicipio: e.codigoMunicipio != null ? String(e.codigoMunicipio) : '',
+    enderecoUf: e.uf ?? '',
+    enderecoCep: e.cep != null ? String(e.cep) : '',
+  };
+}
+
+function formatDigits(value: string | null | undefined): string {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/\D/g, '');
+}
+
+function numToStr(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value);
+}
+
+function formatOptionalNumber(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value);
+}
+
+function sanitizeEmail(value: string | null | undefined): string {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/^\s+/, '').replace(/^\t+/, '').trim();
 }

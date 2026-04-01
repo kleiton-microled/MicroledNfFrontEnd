@@ -34,3 +34,10 @@ export const LOCAL_RPS_PROCESS_API_URL = new InjectionToken<string>('LOCAL_RPS_P
 export const LOCAL_RPS_STATUS_API_URL = new InjectionToken<string>('LOCAL_RPS_STATUS_API_URL', {
   factory: () => 'http://localhost:5278/api/local/rps/status',
 });
+
+export const LOCAL_ACCESS_PENDING_RPS_API_URL = new InjectionToken<string>(
+  'LOCAL_ACCESS_PENDING_RPS_API_URL',
+  {
+    factory: () => 'http://localhost:5278/api/local/access/pending-rps',
+  },
+);
