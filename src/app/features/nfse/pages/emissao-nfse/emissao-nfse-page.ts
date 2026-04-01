@@ -37,17 +37,6 @@ export class EmissaoNfsePageComponent implements OnInit {
       const prestadorLockedNames = [
         'prestadorCpfCnpj',
         'prestadorInscricaoMunicipal',
-        'prestadorRazaoSocial',
-        'prestadorEmail',
-        'prestadorTipoLogradouro',
-        'prestadorLogradouro',
-        'prestadorNumero',
-        'prestadorComplemento',
-        'prestadorBairro',
-        'prestadorCodigoMunicipio',
-        'prestadorUf',
-        'prestadorCep',
-        'inscricaoPrestador',
       ] as const;
 
       for (const name of prestadorLockedNames) {
