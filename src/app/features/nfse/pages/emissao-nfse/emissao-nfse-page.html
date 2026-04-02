@@ -6,7 +6,7 @@
       <p class="text-secondary mb-0">
         Os dados do prestador vêm do certificado atual. Demais campos são preenchidos manualmente ou por
         <strong>Importar RPS pendente</strong>. Use <strong>Calcular valores e impostos</strong> antes de
-        gerar arquivos ou enviar a nota.
+        gerar arquivos ou enviar a nota. Cada bloco abaixo pode ser recolhido clicando no titulo.
       </p>
     </div>
   </header>
@@ -28,8 +28,12 @@
   <form [formGroup]="form" (ngSubmit)="generateFiles()" class="card border-0 shadow-sm">
     <div class="card-body p-4 p-xl-5">
       <div class="d-flex flex-column gap-4">
-        <section>
-          <h2 class="h4 mb-3">Prestador (certificado)</h2>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">Prestador (certificado)</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <p class="text-secondary small mb-3">
             Preenchido automaticamente pelo certificado selecionado. Com certificado ativo, estes campos ficam
             bloqueados.
@@ -144,8 +148,15 @@
               />
             </div>
           </div>
+          </div>
+        </details>
 
-          <h3 class="h5 mt-4 mb-3">Periodo do lote</h3>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">Periodo do lote</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label" for="dataInicio">Data inicio</label>
@@ -163,10 +174,15 @@
               </div>
             </div>
           </div>
-        </section>
+          </div>
+        </details>
 
-        <section>
-          <h2 class="h4 mb-3">RPS e servico</h2>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">RPS e servico</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <div class="row g-3">
             <div class="col-12 col-md-3">
               <label class="form-label" for="inscricaoPrestador">Inscricao do prestador</label>
@@ -258,10 +274,15 @@
               }
             </div>
           </div>
-        </section>
+          </div>
+        </details>
 
-        <section>
-          <h2 class="h4 mb-3">Tomador</h2>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">Tomador</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <div class="row g-3">
             <div class="col-12 col-md-4">
               <label class="form-label" for="tomadorCpfCnpj">CPF/CNPJ</label>
@@ -351,10 +372,15 @@
               <input id="enderecoCep" class="form-control" type="text" formControlName="enderecoCep" />
             </div>
           </div>
-        </section>
+          </div>
+        </details>
 
-        <section>
-          <h2 class="h4 mb-3">Tributos</h2>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">Tributos</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <p class="small text-secondary">
             Valores calculados pela API (preenchidos ao usar Calcular valores e impostos; campos bloqueados).
           </p>
@@ -507,10 +533,15 @@
               </ul>
             </details>
           }
-        </section>
+          </div>
+        </details>
 
-        <section>
-          <h2 class="h4 mb-3">IBS / CBS</h2>
+        <details class="emissao-form-section card border-0 shadow-sm" open>
+          <summary class="emissao-form-section__summary card-body py-3">
+            <span class="h5 mb-0">IBS / CBS</span>
+            <span class="emissao-form-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="card-body pt-0 border-top">
           <div class="row g-3">
             <div class="col-12 col-md-2">
               <label class="form-label" for="ibsFinNFSe">Fin NFSe</label>
@@ -594,7 +625,8 @@
               <input id="ibsImovelCObra" class="form-control" type="text" formControlName="ibsImovelCObra" />
             </div>
           </div>
-        </section>
+          </div>
+        </details>
 
         <div class="d-flex flex-wrap gap-2">
           <button
