@@ -41,3 +41,10 @@ export const LOCAL_ACCESS_PENDING_RPS_API_URL = new InjectionToken<string>(
     factory: () => 'http://localhost:5278/api/local/access/pending-rps',
   },
 );
+
+export const LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL = new InjectionToken<string>(
+  'LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL',
+  {
+    factory: () => 'http://localhost:5278/api/local/nfse-sp/calculate-taxes',
+  },
+);

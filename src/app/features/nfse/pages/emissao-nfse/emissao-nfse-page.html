@@ -5,7 +5,8 @@
       <h1 class="h2 mb-2">Geracao local de arquivo RPS</h1>
       <p class="text-secondary mb-0">
         Os dados do prestador vêm do certificado atual. Demais campos são preenchidos manualmente ou por
-        <strong>Importar RPS pendente</strong>.
+        <strong>Importar RPS pendente</strong>. Use <strong>Calcular valores e impostos</strong> antes de
+        gerar arquivos ou enviar a nota.
       </p>
     </div>
   </header>
@@ -236,6 +237,26 @@
                 <label class="form-check-label" for="issRetido">ISS retido</label>
               </div>
             </div>
+            <div class="col-12 d-flex flex-wrap align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                [disabled]="facade.isCalculatingTaxes()"
+                (click)="calculateTaxes()"
+              >
+                @if (facade.isCalculatingTaxes()) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                }
+                Calcular valores e impostos
+              </button>
+              @if (facade.taxesCalculatedSuccessfully()) {
+                <span class="text-success small mb-0">Calculo concluido.</span>
+              } @else {
+                <span class="text-secondary small mb-0">
+                  É obrigatório calcular antes de gerar arquivos ou enviar a nota.
+                </span>
+              }
+            </div>
           </div>
         </section>
 
@@ -334,7 +355,46 @@
 
         <section>
           <h2 class="h4 mb-3">Tributos</h2>
+          <p class="small text-secondary">
+            Valores calculados pela API (preenchidos ao usar Calcular valores e impostos; campos bloqueados).
+          </p>
           <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosBaseCalculoIss">Base calculo ISS</label>
+              <input
+                id="tributosBaseCalculoIss"
+                class="form-control"
+                type="text"
+                formControlName="tributosBaseCalculoIss"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosBaseCalculoFederal">Base calculo federal</label>
+              <input
+                id="tributosBaseCalculoFederal"
+                class="form-control"
+                type="text"
+                formControlName="tributosBaseCalculoFederal"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosValorISS">Valor ISS</label>
+              <input
+                id="tributosValorISS"
+                class="form-control"
+                type="text"
+                formControlName="tributosValorISS"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label" for="tributosTotalRetencoesFederais">Total retencoes federais</label>
+              <input
+                id="tributosTotalRetencoesFederais"
+                class="form-control"
+                type="text"
+                formControlName="tributosTotalRetencoesFederais"
+              />
+            </div>
             <div class="col-12 col-md-3">
               <label class="form-label" for="tributosValorPIS">Valor PIS</label>
               <input id="tributosValorPIS" class="form-control" type="text" formControlName="tributosValorPIS" />
@@ -406,7 +466,7 @@
               />
             </div>
             <div class="col-12 col-md-4">
-              <label class="form-label" for="tributosValorFinalCobrado">Valor final cobrado</label>
+              <label class="form-label" for="tributosValorFinalCobrado">Valor liquido (final cobrado)</label>
               <input
                 id="tributosValorFinalCobrado"
                 class="form-control"
@@ -437,6 +497,16 @@
               <input id="tributosNcm" class="form-control" type="text" formControlName="tributosNcm" />
             </div>
           </div>
+          @if (facade.memoriaCalculo().length > 0) {
+            <details class="mt-3 border rounded p-3">
+              <summary class="fw-semibold">Memoria de calculo</summary>
+              <ul class="mb-0 mt-2 ps-3 small">
+                @for (line of facade.memoriaCalculo(); track line) {
+                  <li>{{ line }}</li>
+                }
+              </ul>
+            </details>
+          }
         </section>
 
         <section>
@@ -527,7 +597,11 @@
         </section>
 
         <div class="d-flex flex-wrap gap-2">
-          <button type="submit" class="btn btn-primary" [disabled]="facade.isLoading()">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="facade.isLoading() || !facade.taxesCalculatedSuccessfully()"
+          >
             @if (facade.isLoading()) {
               <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
             }
@@ -536,7 +610,7 @@
           <button
             type="button"
             class="btn btn-success"
-            [disabled]="facade.isProcessing()"
+            [disabled]="facade.isProcessing() || !facade.taxesCalculatedSuccessfully()"
             (click)="processRps()"
           >
             @if (facade.isProcessing()) {
@@ -571,6 +645,12 @@
       </div>
     </div>
   </form>
+
+  @if (facade.calculateTaxesErrorMessage()) {
+    <div class="alert alert-warning mb-0">
+      {{ facade.calculateTaxesErrorMessage() }}
+    </div>
+  }
 
   @if (facade.importPendingErrorMessage()) {
     <div class="alert alert-warning mb-0">

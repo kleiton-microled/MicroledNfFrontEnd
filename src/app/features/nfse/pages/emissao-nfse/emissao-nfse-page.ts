@@ -1,5 +1,6 @@
 import { Component, effect, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { merge } from 'rxjs';
 
 import { EmissaoRpsTesteFacade } from './facades/emissao-rps-teste.facade';
 import {
@@ -8,6 +9,19 @@ import {
   mapFormToGerarArquivoRpsRequest,
   mapFormToProcessarRpsRequest,
 } from './models/emissao-rps-teste.models';
+
+const TRIBUTOS_APENAS_API_FORM_KEYS = [
+  'tributosBaseCalculoIss',
+  'tributosBaseCalculoFederal',
+  'tributosValorISS',
+  'tributosTotalRetencoesFederais',
+  'tributosValorPIS',
+  'tributosValorCOFINS',
+  'tributosValorINSS',
+  'tributosValorIR',
+  'tributosValorCSLL',
+  'tributosValorFinalCobrado',
+] as const;
 
 @Component({
   selector: 'app-emissao-nfse-page',
@@ -31,6 +45,7 @@ export class EmissaoNfsePageComponent implements OnInit {
       if (currentCertificate) {
         this.form.patchValue(
           applyCertificateToEmissaoRpsTesteFormValue(this.form.getRawValue(), currentCertificate),
+          { emitEvent: false },
         );
       }
 
@@ -55,13 +70,41 @@ export class EmissaoNfsePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.facade.loadCurrentCertificate();
+
+    for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
+      this.form.get(name)?.disable({ emitEvent: false });
+    }
+
+    merge(
+      this.form.controls.valorServicos.valueChanges,
+      this.form.controls.aliquotaServicos.valueChanges,
+      this.form.controls.codigoServico.valueChanges,
+    ).subscribe(() => {
+      this.facade.onTaxCalculationInputsChanged((patch) =>
+        this.form.patchValue(patch, { emitEvent: false }),
+      );
+    });
+  }
+
+  protected calculateTaxes(): void {
+    this.facade.calculateTaxes(this.form.getRawValue(), (patch) =>
+      this.form.patchValue(patch, { emitEvent: false }),
+    );
   }
 
   protected generateFiles(): void {
+    if (!this.facade.taxesCalculatedSuccessfully()) {
+      return;
+    }
+
     this.facade.generateFiles(mapFormToGerarArquivoRpsRequest(this.form.getRawValue()));
   }
 
   protected processRps(): void {
+    if (!this.facade.taxesCalculatedSuccessfully()) {
+      return;
+    }
+
     this.facade.processRps(mapFormToProcessarRpsRequest(this.form.getRawValue()));
   }
 
@@ -83,9 +126,16 @@ export class EmissaoNfsePageComponent implements OnInit {
         ? applyCertificateToEmissaoRpsTesteFormValue(defaultValue, currentCertificate)
         : defaultValue,
     );
+    this.facade.resetTaxCalculationState();
+
+    for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
+      this.form.get(name)?.disable({ emitEvent: false });
+    }
   }
 
   protected importPendingRps(): void {
-    this.facade.importPendingRps(this.form.getRawValue(), (value) => this.form.patchValue(value));
+    this.facade.importPendingRps(this.form.getRawValue(), (value) =>
+      this.form.patchValue(value, { emitEvent: false }),
+    );
   }
 }

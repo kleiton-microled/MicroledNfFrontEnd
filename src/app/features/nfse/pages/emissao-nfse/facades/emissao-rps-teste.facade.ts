@@ -12,8 +12,12 @@ import {
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
 import {
+  buildNfseSpCalculateTaxesRequest,
   EmissaoRpsTesteFormValue,
+  getEmptyCalculatedTributosFromApiPatch,
+  mapNfseSpCalculateTaxesResponseToFormPatch,
   mapPendingRpsResponseToEmissaoRpsTesteFormValue,
+  validateNfseSpCalculateTaxesInput,
 } from '../models/emissao-rps-teste.models';
 
 @Injectable()
@@ -35,6 +39,10 @@ export class EmissaoRpsTesteFacade {
   private readonly _currentCertificateMessage = signal<string | null>(null);
   private readonly _isImportingPending = signal(false);
   private readonly _importPendingErrorMessage = signal<string | null>(null);
+  private readonly _isCalculatingTaxes = signal(false);
+  private readonly _calculateTaxesErrorMessage = signal<string | null>(null);
+  private readonly _taxesCalculatedSuccessfully = signal(false);
+  private readonly _memoriaCalculo = signal<readonly string[]>([]);
 
   readonly isLoading = this._isLoading.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
@@ -51,6 +59,10 @@ export class EmissaoRpsTesteFacade {
   readonly currentCertificateMessage = this._currentCertificateMessage.asReadonly();
   readonly isImportingPending = this._isImportingPending.asReadonly();
   readonly importPendingErrorMessage = this._importPendingErrorMessage.asReadonly();
+  readonly isCalculatingTaxes = this._isCalculatingTaxes.asReadonly();
+  readonly calculateTaxesErrorMessage = this._calculateTaxesErrorMessage.asReadonly();
+  readonly taxesCalculatedSuccessfully = this._taxesCalculatedSuccessfully.asReadonly();
+  readonly memoriaCalculo = this._memoriaCalculo.asReadonly();
 
   loadCurrentCertificate(): void {
     this._loadingCurrentCertificate.set(true);
@@ -79,6 +91,55 @@ export class EmissaoRpsTesteFacade {
       });
   }
 
+  calculateTaxes(
+    rawForm: EmissaoRpsTesteFormValue,
+    onPatch: (patch: Partial<EmissaoRpsTesteFormValue>) => void,
+  ): void {
+    const validationError = validateNfseSpCalculateTaxesInput(rawForm);
+    if (validationError) {
+      this._calculateTaxesErrorMessage.set(validationError);
+      this._taxesCalculatedSuccessfully.set(false);
+      return;
+    }
+
+    this._isCalculatingTaxes.set(true);
+    this._calculateTaxesErrorMessage.set(null);
+
+    this.nfseApiService
+      .calcularImpostosNfseSp(buildNfseSpCalculateTaxesRequest(rawForm))
+      .pipe(finalize(() => this._isCalculatingTaxes.set(false)))
+      .subscribe({
+        next: (response) => {
+          onPatch(mapNfseSpCalculateTaxesResponseToFormPatch(response));
+          this._memoriaCalculo.set(response.memoriaCalculo ?? []);
+          this._taxesCalculatedSuccessfully.set(true);
+          this._calculateTaxesErrorMessage.set(null);
+        },
+        error: (error: unknown) => {
+          this._taxesCalculatedSuccessfully.set(false);
+          this._memoriaCalculo.set([]);
+          onPatch(getEmptyCalculatedTributosFromApiPatch());
+          this._calculateTaxesErrorMessage.set(this.getCalculateTaxesErrorMessage(error));
+        },
+      });
+  }
+
+  /** Quando valor servico, aliquota ou codigo de servico mudam, invalida o calculo e limpa tributos vindos da API. */
+  onTaxCalculationInputsChanged(
+    onPatch: (patch: Partial<EmissaoRpsTesteFormValue>) => void,
+  ): void {
+    this._taxesCalculatedSuccessfully.set(false);
+    this._memoriaCalculo.set([]);
+    this._calculateTaxesErrorMessage.set(null);
+    onPatch(getEmptyCalculatedTributosFromApiPatch());
+  }
+
+  resetTaxCalculationState(): void {
+    this._taxesCalculatedSuccessfully.set(false);
+    this._memoriaCalculo.set([]);
+    this._calculateTaxesErrorMessage.set(null);
+  }
+
   importPendingRps(
     currentForm: EmissaoRpsTesteFormValue,
     onMapped: (value: EmissaoRpsTesteFormValue) => void,
@@ -98,6 +159,9 @@ export class EmissaoRpsTesteFacade {
 
           const mapped = mapPendingRpsResponseToEmissaoRpsTesteFormValue(response, currentForm);
           onMapped(mapped);
+          this._taxesCalculatedSuccessfully.set(false);
+          this._memoriaCalculo.set([]);
+          this._calculateTaxesErrorMessage.set(null);
         },
         error: (error: unknown) => {
           this._importPendingErrorMessage.set(this.getImportPendingErrorMessage(error));
@@ -252,5 +316,13 @@ export class EmissaoRpsTesteFacade {
     }
 
     return 'Nao foi possivel importar o RPS pendente.';
+  }
+
+  private getCalculateTaxesErrorMessage(error: unknown): string {
+    if (error instanceof NfseApiError) {
+      return error.message;
+    }
+
+    return 'Nao foi possivel calcular impostos.';
   }
 }

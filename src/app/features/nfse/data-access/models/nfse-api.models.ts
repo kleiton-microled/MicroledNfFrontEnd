@@ -397,6 +397,35 @@ export interface ProcessarRpsResponse {
   nfeRpsKeys: string[];
 }
 
+/** POST /api/local/nfse-sp/calculate-taxes */
+export interface NfseSpCalculateTaxesRequest {
+  valorServico: number;
+  valorDeducoes: number;
+  descontoIncondicional: number;
+  descontoCondicional: number;
+  aliquotaIss: number;
+  issRetido: boolean;
+  codigoServico: string;
+  regimeTributario: string;
+  baseFederalSobreValorLiquido: boolean;
+  arredondarNaCasaFiscal: boolean;
+}
+
+export interface NfseSpCalculateTaxesResponse {
+  baseCalculoIss: number;
+  baseCalculoFederal: number;
+  valorIss: number;
+  valorPis: number;
+  valorCofins: number;
+  valorCsll: number;
+  valorIr: number;
+  valorInss: number;
+  totalRetencoesFederais: number;
+  totalRetencoes: number;
+  valorLiquido: number;
+  memoriaCalculo: string[];
+}
+
 /** Item de `rpsList` no retorno de GET /api/local/access/pending-rps (API pode enviar nulls). */
 export interface PendingRpsApiItem {
   inscricaoPrestador?: number;

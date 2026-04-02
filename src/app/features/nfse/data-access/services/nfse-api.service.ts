@@ -26,6 +26,8 @@ import {
   NfseDetalheResponse,
   NfseQueryFilters,
   NfseResumoResponse,
+  NfseSpCalculateTaxesRequest,
+  NfseSpCalculateTaxesResponse,
   OperacaoNfseResponse,
   PendingRpsResponse,
   ProcessarRpsRequest,
@@ -37,6 +39,7 @@ import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
   LOCAL_ACCESS_PENDING_RPS_API_URL,
+  LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL,
   LOCAL_NFE_CANCEL_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   LOCAL_RPS_PROCESS_API_URL,
@@ -59,6 +62,7 @@ export class NfseApiService {
   private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
   private readonly localRpsStatusApiUrl = inject(LOCAL_RPS_STATUS_API_URL);
   private readonly localAccessPendingRpsApiUrl = inject(LOCAL_ACCESS_PENDING_RPS_API_URL);
+  private readonly localNfseSpCalculateTaxesApiUrl = inject(LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -172,6 +176,12 @@ export class NfseApiService {
     return this.http
       .post<ConsultarStatusRpsResponse>(this.localRpsStatusApiUrl, payload)
       .pipe(catchError((error) => this.handleError('consulta de status do protocolo', error)));
+  }
+
+  calcularImpostosNfseSp(payload: NfseSpCalculateTaxesRequest): Observable<NfseSpCalculateTaxesResponse> {
+    return this.http
+      .post<NfseSpCalculateTaxesResponse>(this.localNfseSpCalculateTaxesApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('calculo de impostos NFSe SP', error)));
   }
 
   emitirRps(payload: EmitirRpsPayload): Observable<OperacaoNfseResponse> {

@@ -1,6 +1,8 @@
 import {
   CertificateResponse,
   GerarArquivoRpsRequest,
+  NfseSpCalculateTaxesRequest,
+  NfseSpCalculateTaxesResponse,
   PendingRpsResponse,
   ProcessarRpsRequest,
   RpsArquivoEnderecoPayload,
@@ -48,6 +50,10 @@ export interface EmissaoRpsTesteFormValue {
   enderecoCodigoMunicipio: string;
   enderecoUf: string;
   enderecoCep: string;
+  tributosBaseCalculoIss: string;
+  tributosBaseCalculoFederal: string;
+  tributosValorISS: string;
+  tributosTotalRetencoesFederais: string;
   tributosValorPIS: string;
   tributosValorCOFINS: string;
   tributosValorINSS: string;
@@ -124,6 +130,10 @@ export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
     enderecoCodigoMunicipio: '',
     enderecoUf: '',
     enderecoCep: '',
+    tributosBaseCalculoIss: '',
+    tributosBaseCalculoFederal: '',
+    tributosValorISS: '',
+    tributosTotalRetencoesFederais: '',
     tributosValorPIS: '',
     tributosValorCOFINS: '',
     tributosValorINSS: '',
@@ -241,6 +251,90 @@ export function mapPendingRpsResponseToEmissaoRpsTesteFormValue(
     ibsImovelCCib: imovel?.cCib?.trim() ?? '',
     ibsImovelCObra: imovel?.cObra?.trim() ?? '',
   };
+}
+
+/** Campos preenchidos apenas pelo endpoint `calculate-taxes` (formulario: desabilitados). */
+export function getEmptyCalculatedTributosFromApiPatch(): Partial<EmissaoRpsTesteFormValue> {
+  return {
+    tributosBaseCalculoIss: '',
+    tributosBaseCalculoFederal: '',
+    tributosValorISS: '',
+    tributosTotalRetencoesFederais: '',
+    tributosValorPIS: '',
+    tributosValorCOFINS: '',
+    tributosValorINSS: '',
+    tributosValorIR: '',
+    tributosValorCSLL: '',
+    tributosValorFinalCobrado: '',
+  };
+}
+
+export function validateNfseSpCalculateTaxesInput(value: EmissaoRpsTesteFormValue): string | null {
+  if (!value.codigoServico.trim()) {
+    return 'Informe o codigo de servico.';
+  }
+
+  if (!value.valorServicos.trim()) {
+    return 'Informe o valor dos servicos.';
+  }
+
+  const valorServico = parseDecimal(value.valorServicos);
+  if (Number.isNaN(valorServico)) {
+    return 'Valor dos servicos invalido.';
+  }
+
+  if (!value.aliquotaServicos.trim()) {
+    return 'Informe a aliquota dos servicos.';
+  }
+
+  const aliquotaIss = parseDecimal(value.aliquotaServicos);
+  if (Number.isNaN(aliquotaIss)) {
+    return 'Aliquota dos servicos invalida.';
+  }
+
+  return null;
+}
+
+export function buildNfseSpCalculateTaxesRequest(
+  value: EmissaoRpsTesteFormValue,
+): NfseSpCalculateTaxesRequest {
+  return {
+    valorServico: parseDecimal(value.valorServicos),
+    valorDeducoes: 0,
+    descontoIncondicional: 0,
+    descontoCondicional: 0,
+    aliquotaIss: parseDecimal(value.aliquotaServicos),
+    issRetido: false,
+    codigoServico: value.codigoServico.trim(),
+    regimeTributario: 'LucroPresumido',
+    baseFederalSobreValorLiquido: true,
+    arredondarNaCasaFiscal: true,
+  };
+}
+
+export function mapNfseSpCalculateTaxesResponseToFormPatch(
+  response: NfseSpCalculateTaxesResponse,
+): Partial<EmissaoRpsTesteFormValue> {
+  return {
+    tributosBaseCalculoIss: formatTaxApiNumber(response.baseCalculoIss),
+    tributosBaseCalculoFederal: formatTaxApiNumber(response.baseCalculoFederal),
+    tributosValorISS: formatTaxApiNumber(response.valorIss),
+    tributosValorPIS: formatTaxApiNumber(response.valorPis),
+    tributosValorCOFINS: formatTaxApiNumber(response.valorCofins),
+    tributosValorINSS: formatTaxApiNumber(response.valorInss),
+    tributosValorIR: formatTaxApiNumber(response.valorIr),
+    tributosValorCSLL: formatTaxApiNumber(response.valorCsll),
+    tributosTotalRetencoesFederais: formatTaxApiNumber(response.totalRetencoesFederais),
+    tributosValorFinalCobrado: formatTaxApiNumber(response.valorLiquido),
+  };
+}
+
+function formatTaxApiNumber(value: number): string {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return '';
+  }
+
+  return String(value);
 }
 
 export function applyCertificateToEmissaoRpsTesteFormValue(
