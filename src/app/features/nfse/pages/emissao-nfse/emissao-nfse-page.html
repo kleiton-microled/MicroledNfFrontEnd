@@ -5,8 +5,8 @@
       <h1 class="h2 mb-2">Geracao local de arquivo RPS</h1>
       <p class="text-secondary mb-0">
         Os dados do prestador vêm do certificado atual. Demais campos são preenchidos manualmente ou por
-        <strong>Importar RPS pendente</strong>. Use <strong>Calcular valores e impostos</strong> antes de
-        gerar arquivos ou enviar a nota. Cada bloco abaixo pode ser recolhido clicando no titulo.
+        <strong>Importar RPS pendente</strong>. Na secao <strong>Tributos</strong>, calcule valores e impostos
+        antes de gerar arquivos ou enviar a nota. Cada bloco abaixo pode ser recolhido clicando no titulo.
       </p>
     </div>
   </header>
@@ -253,26 +253,6 @@
                 <label class="form-check-label" for="issRetido">ISS retido</label>
               </div>
             </div>
-            <div class="col-12 d-flex flex-wrap align-items-center gap-2">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                [disabled]="facade.isCalculatingTaxes()"
-                (click)="calculateTaxes()"
-              >
-                @if (facade.isCalculatingTaxes()) {
-                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                }
-                Calcular valores e impostos
-              </button>
-              @if (facade.taxesCalculatedSuccessfully()) {
-                <span class="text-success small mb-0">Calculo concluido.</span>
-              } @else {
-                <span class="text-secondary small mb-0">
-                  É obrigatório calcular antes de gerar arquivos ou enviar a nota.
-                </span>
-              }
-            </div>
           </div>
           </div>
         </details>
@@ -382,8 +362,28 @@
           </summary>
           <div class="card-body pt-0 border-top">
           <p class="small text-secondary">
-            Valores calculados pela API (preenchidos ao usar Calcular valores e impostos; campos bloqueados).
+            Valores calculados pela API (preenchidos ao usar o botao abaixo; campos bloqueados).
           </p>
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [disabled]="facade.isCalculatingTaxes()"
+              (click)="calculateTaxes()"
+            >
+              @if (facade.isCalculatingTaxes()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              }
+              Calcular valores e impostos
+            </button>
+            @if (facade.taxesCalculatedSuccessfully()) {
+              <span class="text-success small mb-0">Calculo concluido.</span>
+            } @else {
+              <span class="text-secondary small mb-0">
+                É obrigatório calcular antes de gerar arquivos ou enviar a nota.
+              </span>
+            }
+          </div>
           <div class="row g-3">
             <div class="col-12 col-md-3">
               <label class="form-label" for="tributosBaseCalculoIss">Base calculo ISS</label>
