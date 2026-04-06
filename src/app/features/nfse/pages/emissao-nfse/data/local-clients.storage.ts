@@ -69,7 +69,7 @@ export const TOMADORES_STORAGE: readonly TomadorTemplate[] = [
     cnpj: '02.390.435/0001-15',
     inscricaoMunicipal: '',
     inscricaoEstadual: '',
-    razaoSocial: 'EUDMARCO S/A SERVICOS E COMERCIO INTERNACIONAL',
+    razaoSocial: 'ECOPORTO SANTOS S/A',
     email: 'administrativoti.op@ecoportosantos.com.br',
     tipoLogradouro: 'AV',
     logradouro: 'ENGENHEIRO ALVES FREIRE',
