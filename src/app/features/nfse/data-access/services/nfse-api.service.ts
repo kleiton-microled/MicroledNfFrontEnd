@@ -35,6 +35,7 @@ import {
   QueryParamValue,
   SelectCertificatePayload,
 } from '../models/nfse-api.models';
+import { mapCertificateStorageErrorToUserMessage } from '../utils/certificate-storage-access-message';
 import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
@@ -222,11 +223,16 @@ export class NfseApiService {
   }
 
   private handleError(context: string, error: HttpErrorResponse): Observable<never> {
-    const apiError = new NfseApiError(
-      this.resolveErrorMessage(context, error),
-      error.status,
-      this.extractErrorDetails(error),
-    );
+    let message = this.resolveErrorMessage(context, error);
+    const certificateStorageFriendly =
+      context === 'consulta de certificados disponiveis'
+        ? mapCertificateStorageErrorToUserMessage(message)
+        : null;
+    if (certificateStorageFriendly) {
+      message = certificateStorageFriendly;
+    }
+
+    const apiError = new NfseApiError(message, error.status, this.extractErrorDetails(error));
 
     return throwError(() => apiError);
   }

@@ -4,7 +4,8 @@
     <div>
       <h1 class="h2 mb-2">Geracao local de arquivo RPS</h1>
       <p class="text-secondary mb-0">
-        Os dados do prestador vêm do certificado atual. Demais campos são preenchidos manualmente ou por
+        Os dados do prestador vêm do certificado atual. Prestador e tomador podem ser autocompletados pelo
+        <strong>cadastro local</strong> (CNPJ ou razao social). Demais campos são preenchidos manualmente ou por
         <strong>Importar RPS pendente</strong>. Na secao <strong>Tributos</strong>, calcule valores e impostos
         antes de gerar arquivos ou enviar a nota. Cada bloco abaixo pode ser recolhido clicando no titulo.
       </p>
@@ -36,36 +37,69 @@
           <div class="card-body pt-0 border-top">
           <p class="text-secondary small mb-3">
             Preenchido automaticamente pelo certificado selecionado. Com certificado ativo, estes campos ficam
-            bloqueados.
+            bloqueados. Digite CNPJ ou razao social para sugestoes do cadastro local.
           </p>
+          <div class="col-12 position-relative mb-1" #prestadorAcHost>
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="prestadorCpfCnpj">CPF/CNPJ do prestador</label>
+                <input
+                  id="prestadorCpfCnpj"
+                  class="form-control"
+                  type="text"
+                  formControlName="prestadorCpfCnpj"
+                  autocomplete="off"
+                  (focusin)="onPrestadorAutocompleteInteract()"
+                  (input)="onPrestadorAutocompleteInteract()"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="prestadorInscricaoMunicipal">Inscricao municipal</label>
+                <input
+                  id="prestadorInscricaoMunicipal"
+                  class="form-control"
+                  type="text"
+                  formControlName="prestadorInscricaoMunicipal"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="prestadorRazaoSocial">Razao social</label>
+                <input
+                  id="prestadorRazaoSocial"
+                  class="form-control"
+                  type="text"
+                  formControlName="prestadorRazaoSocial"
+                  autocomplete="off"
+                  (focusin)="onPrestadorAutocompleteInteract()"
+                  (input)="onPrestadorAutocompleteInteract()"
+                />
+              </div>
+            </div>
+            @if (showPrestadorSuggestions() && prestadorMatches().length > 0) {
+              <ul
+                class="emissao-autocomplete-dropdown list-group position-absolute w-100 shadow-sm mt-1"
+                role="listbox"
+              >
+                @for (item of prestadorMatches(); track item.razaoSocial) {
+                  <li class="list-group-item list-group-item-action py-2 px-3">
+                    <button
+                      type="button"
+                      class="btn btn-link text-start text-decoration-none p-0 w-100 text-body"
+                      (click)="selectPrestador(item)"
+                    >
+                      <span class="fw-semibold d-block">{{ item.razaoSocial }}</span>
+                      @if (item.cnpj.trim().length > 0) {
+                        <span class="small text-secondary">{{ item.cnpj }}</span>
+                      } @else {
+                        <span class="small text-secondary">CNPJ pelo certificado</span>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
           <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="prestadorCpfCnpj">CPF/CNPJ do prestador</label>
-              <input
-                id="prestadorCpfCnpj"
-                class="form-control"
-                type="text"
-                formControlName="prestadorCpfCnpj"
-              />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="prestadorInscricaoMunicipal">Inscricao municipal</label>
-              <input
-                id="prestadorInscricaoMunicipal"
-                class="form-control"
-                type="text"
-                formControlName="prestadorInscricaoMunicipal"
-              />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="prestadorRazaoSocial">Razao social</label>
-              <input
-                id="prestadorRazaoSocial"
-                class="form-control"
-                type="text"
-                formControlName="prestadorRazaoSocial"
-              />
-            </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="prestadorEmail">Email do prestador</label>
               <input
@@ -263,38 +297,75 @@
             <span class="emissao-form-section__chevron" aria-hidden="true"></span>
           </summary>
           <div class="card-body pt-0 border-top">
+          <p class="text-secondary small mb-3">
+            Digite CNPJ ou razao social para sugestoes do cadastro local.
+          </p>
+          <div class="col-12 position-relative mb-1" #tomadorAcHost>
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="tomadorCpfCnpj">CPF/CNPJ</label>
+                <input
+                  id="tomadorCpfCnpj"
+                  class="form-control"
+                  type="text"
+                  formControlName="tomadorCpfCnpj"
+                  autocomplete="off"
+                  (focusin)="onTomadorAutocompleteInteract()"
+                  (input)="onTomadorAutocompleteInteract()"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="tomadorInscricaoMunicipal">Inscricao municipal</label>
+                <input
+                  id="tomadorInscricaoMunicipal"
+                  class="form-control"
+                  type="text"
+                  formControlName="tomadorInscricaoMunicipal"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="tomadorInscricaoEstadual">Inscricao estadual</label>
+                <input
+                  id="tomadorInscricaoEstadual"
+                  class="form-control"
+                  type="text"
+                  formControlName="tomadorInscricaoEstadual"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="tomadorRazaoSocial">Razao social</label>
+                <input
+                  id="tomadorRazaoSocial"
+                  class="form-control"
+                  type="text"
+                  formControlName="tomadorRazaoSocial"
+                  autocomplete="off"
+                  (focusin)="onTomadorAutocompleteInteract()"
+                  (input)="onTomadorAutocompleteInteract()"
+                />
+              </div>
+            </div>
+            @if (showTomadorSuggestions() && tomadorMatches().length > 0) {
+              <ul
+                class="emissao-autocomplete-dropdown list-group position-absolute w-100 shadow-sm mt-1"
+                role="listbox"
+              >
+                @for (item of tomadorMatches(); track item.cnpj + item.razaoSocial) {
+                  <li class="list-group-item list-group-item-action py-2 px-3">
+                    <button
+                      type="button"
+                      class="btn btn-link text-start text-decoration-none p-0 w-100 text-body"
+                      (click)="selectTomador(item)"
+                    >
+                      <span class="fw-semibold d-block">{{ item.razaoSocial }}</span>
+                      <span class="small text-secondary">{{ item.cnpj }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
           <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="tomadorCpfCnpj">CPF/CNPJ</label>
-              <input id="tomadorCpfCnpj" class="form-control" type="text" formControlName="tomadorCpfCnpj" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="tomadorInscricaoMunicipal">Inscricao municipal</label>
-              <input
-                id="tomadorInscricaoMunicipal"
-                class="form-control"
-                type="text"
-                formControlName="tomadorInscricaoMunicipal"
-              />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="tomadorInscricaoEstadual">Inscricao estadual</label>
-              <input
-                id="tomadorInscricaoEstadual"
-                class="form-control"
-                type="text"
-                formControlName="tomadorInscricaoEstadual"
-              />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label" for="tomadorRazaoSocial">Razao social</label>
-              <input
-                id="tomadorRazaoSocial"
-                class="form-control"
-                type="text"
-                formControlName="tomadorRazaoSocial"
-              />
-            </div>
             <div class="col-12 col-md-4">
               <label class="form-label" for="tomadorEmail">Email</label>
               <input id="tomadorEmail" class="form-control" type="email" formControlName="tomadorEmail" />

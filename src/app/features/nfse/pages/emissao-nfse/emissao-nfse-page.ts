@@ -1,7 +1,26 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { merge } from 'rxjs';
 
+import {
+  filterPrestadores,
+  filterTomadores,
+  prestadorTemplateToFormPatch,
+  type PrestadorTemplate,
+  type TomadorTemplate,
+  tomadorTemplateToFormPatch,
+} from './data/local-clients.storage';
 import { EmissaoRpsTesteFacade } from './facades/emissao-rps-teste.facade';
 import {
   applyCertificateToEmissaoRpsTesteFormValue,
@@ -33,9 +52,18 @@ const TRIBUTOS_APENAS_API_FORM_KEYS = [
 })
 export class EmissaoNfsePageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly facade = inject(EmissaoRpsTesteFacade);
   protected readonly form = this.formBuilder.nonNullable.group(getDefaultEmissaoRpsTesteFormValue());
+
+  protected readonly prestadorAcHost = viewChild<ElementRef<HTMLElement>>('prestadorAcHost');
+  protected readonly tomadorAcHost = viewChild<ElementRef<HTMLElement>>('tomadorAcHost');
+
+  protected readonly prestadorMatches = signal<PrestadorTemplate[]>([]);
+  protected readonly showPrestadorSuggestions = signal(false);
+  protected readonly tomadorMatches = signal<TomadorTemplate[]>([]);
+  protected readonly showTomadorSuggestions = signal(false);
 
   constructor() {
     effect(() => {
@@ -79,11 +107,88 @@ export class EmissaoNfsePageComponent implements OnInit {
       this.form.controls.valorServicos.valueChanges,
       this.form.controls.aliquotaServicos.valueChanges,
       this.form.controls.codigoServico.valueChanges,
-    ).subscribe(() => {
-      this.facade.onTaxCalculationInputsChanged((patch) =>
-        this.form.patchValue(patch, { emitEvent: false }),
-      );
-    });
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.facade.onTaxCalculationInputsChanged((patch) =>
+          this.form.patchValue(patch, { emitEvent: false }),
+        );
+      });
+
+    merge(
+      this.form.controls.prestadorCpfCnpj.valueChanges,
+      this.form.controls.prestadorRazaoSocial.valueChanges,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.showPrestadorSuggestions()) {
+          this.refreshPrestadorMatches();
+        }
+      });
+
+    merge(
+      this.form.controls.tomadorCpfCnpj.valueChanges,
+      this.form.controls.tomadorRazaoSocial.valueChanges,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.showTomadorSuggestions()) {
+          this.refreshTomadorMatches();
+        }
+      });
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node;
+    if (this.prestadorAcHost()?.nativeElement.contains(target)) {
+      return;
+    }
+    if (this.tomadorAcHost()?.nativeElement.contains(target)) {
+      return;
+    }
+    this.showPrestadorSuggestions.set(false);
+    this.showTomadorSuggestions.set(false);
+  }
+
+  protected onPrestadorAutocompleteInteract(): void {
+    this.showPrestadorSuggestions.set(true);
+    this.refreshPrestadorMatches();
+  }
+
+  protected refreshPrestadorMatches(): void {
+    this.prestadorMatches.set(
+      filterPrestadores(
+        this.form.controls.prestadorCpfCnpj.getRawValue(),
+        this.form.controls.prestadorRazaoSocial.getRawValue(),
+      ),
+    );
+  }
+
+  protected selectPrestador(item: PrestadorTemplate): void {
+    this.form.patchValue(prestadorTemplateToFormPatch(item), { emitEvent: false });
+    this.showPrestadorSuggestions.set(false);
+    this.prestadorMatches.set([]);
+  }
+
+  protected onTomadorAutocompleteInteract(): void {
+    this.showTomadorSuggestions.set(true);
+    this.refreshTomadorMatches();
+  }
+
+  protected refreshTomadorMatches(): void {
+    this.tomadorMatches.set(
+      filterTomadores(
+        this.form.controls.tomadorCpfCnpj.getRawValue(),
+        this.form.controls.tomadorRazaoSocial.getRawValue(),
+      ),
+    );
+  }
+
+  protected selectTomador(item: TomadorTemplate): void {
+    this.form.patchValue(tomadorTemplateToFormPatch(item), { emitEvent: false });
+    this.showTomadorSuggestions.set(false);
+    this.tomadorMatches.set([]);
   }
 
   protected calculateTaxes(): void {
