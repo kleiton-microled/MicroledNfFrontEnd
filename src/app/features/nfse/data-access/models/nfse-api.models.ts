@@ -292,14 +292,6 @@ export interface RpsArquivoItemRpsPayload {
   tomador: RpsArquivoTomadorPayload;
 }
 
-export interface GerarArquivoRpsRequest {
-  prestador: RpsArquivoPrestadorPayload;
-  rpsList: RpsArquivoItemRpsPayload[];
-  dataInicio: string;
-  dataFim: string;
-  transacao: boolean;
-}
-
 export interface ProcessarRpsPrestadorPayload extends RpsArquivoPrestadorPayload {
   email: string;
   endereco: RpsArquivoEnderecoPayload;
@@ -372,6 +364,9 @@ export interface ProcessarRpsRequest {
   dataFim: string;
   transacao: boolean;
 }
+
+/** Mesmo contrato de {@link ProcessarRpsRequest} (prestador completo, tributos calculados, IBS/CBS). */
+export type GerarArquivoRpsRequest = ProcessarRpsRequest;
 
 export interface GerarArquivoRpsResponse {
   success: boolean;

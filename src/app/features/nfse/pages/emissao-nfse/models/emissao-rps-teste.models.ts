@@ -358,55 +358,6 @@ export function applyCertificateToEmissaoRpsTesteFormValue(
   };
 }
 
-export function mapFormToGerarArquivoRpsRequest(
-  value: EmissaoRpsTesteFormValue,
-): GerarArquivoRpsRequest {
-  return {
-    prestador: {
-      cpfCnpj: normalizeNumeric(value.prestadorCpfCnpj),
-      inscricaoMunicipal: Number(normalizeNumeric(value.prestadorInscricaoMunicipal)),
-      razaoSocial: value.prestadorRazaoSocial.trim(),
-    },
-    rpsList: [
-      {
-        inscricaoPrestador: Number(normalizeNumeric(value.inscricaoPrestador)),
-        serieRps: value.serieRps.trim(),
-        numeroRps: Number(normalizeNumeric(value.numeroRps)),
-        tipoRPS: value.tipoRps.trim(),
-        dataEmissao: value.dataEmissao,
-        statusRPS: value.statusRps.trim(),
-        tributacaoRPS: value.tributacaoRps.trim(),
-        item: {
-          codigoServico: Number(normalizeNumeric(value.codigoServico)),
-          discriminacao: value.discriminacao.trim(),
-          valorServicos: parseDecimal(value.valorServicos),
-          valorDeducoes: parseDecimal(value.valorDeducoes),
-          aliquotaServicos: parseDecimal(value.aliquotaServicos),
-          issRetido: value.issRetido,
-        },
-        tomador: {
-          cpfCnpj: normalizeNumeric(value.tomadorCpfCnpj),
-          razaoSocial: value.tomadorRazaoSocial.trim(),
-          email: value.tomadorEmail.trim(),
-          endereco: {
-            tipoLogradouro: normalizeNullableText(value.enderecoTipoLogradouro),
-            logradouro: value.enderecoLogradouro.trim(),
-            numero: value.enderecoNumero.trim(),
-            complemento: normalizeNullableText(value.enderecoComplemento),
-            bairro: value.enderecoBairro.trim(),
-            codigoMunicipio: Number(normalizeNumeric(value.enderecoCodigoMunicipio)),
-            uf: value.enderecoUf.trim().toUpperCase(),
-            cep: Number(normalizeNumeric(value.enderecoCep)),
-          },
-        },
-      },
-    ],
-    dataInicio: value.dataInicio,
-    dataFim: value.dataFim,
-    transacao: value.transacao,
-  };
-}
-
 export function mapFormToProcessarRpsRequest(value: EmissaoRpsTesteFormValue): ProcessarRpsRequest {
   const tomadorEndereco = {
     tipoLogradouro: normalizeNullableText(value.enderecoTipoLogradouro),
@@ -513,6 +464,13 @@ export function mapFormToProcessarRpsRequest(value: EmissaoRpsTesteFormValue): P
     dataFim: value.dataFim,
     transacao: value.transacao,
   };
+}
+
+/** Geracao de arquivo RPS usa o mesmo payload do envio da nota (tributos e IBS/CBS incluidos). */
+export function mapFormToGerarArquivoRpsRequest(
+  value: EmissaoRpsTesteFormValue,
+): GerarArquivoRpsRequest {
+  return mapFormToProcessarRpsRequest(value);
 }
 
 function normalizeNumeric(value: string): string {
