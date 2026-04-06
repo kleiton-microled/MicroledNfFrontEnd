@@ -78,6 +78,7 @@ export class EmissaoNfsePageComponent implements OnInit {
           applyCertificateToEmissaoRpsTesteFormValue(this.form.getRawValue(), currentCertificate),
           { emitEvent: false },
         );
+        this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
       }
 
       const prestadorLockedNames = [
@@ -133,6 +134,12 @@ export class EmissaoNfsePageComponent implements OnInit {
         }
       });
 
+    this.form.controls.prestadorCodigoMunicipio.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncIbsLocalPrestacaoWithPrestadorMunicipio());
+
+    this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+
     merge(
       this.form.controls.tomadorCpfCnpj.valueChanges,
       this.form.controls.tomadorRazaoSocial.valueChanges,
@@ -174,6 +181,7 @@ export class EmissaoNfsePageComponent implements OnInit {
 
   protected selectPrestador(item: PrestadorTemplate): void {
     this.form.patchValue(prestadorTemplateToFormPatch(item), { emitEvent: false });
+    this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
     this.showPrestadorSuggestions.set(false);
     this.prestadorMatches.set([]);
   }
@@ -238,6 +246,7 @@ export class EmissaoNfsePageComponent implements OnInit {
         ? applyCertificateToEmissaoRpsTesteFormValue(defaultValue, currentCertificate)
         : defaultValue,
     );
+    this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
     this.facade.resetTaxCalculationState();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
@@ -250,8 +259,18 @@ export class EmissaoNfsePageComponent implements OnInit {
   }
 
   protected importPendingRps(): void {
-    this.facade.importPendingRps(this.form.getRawValue(), (value) =>
-      this.form.patchValue(value, { emitEvent: false }),
-    );
+    this.facade.importPendingRps(this.form.getRawValue(), (value) => {
+      this.form.patchValue(value, { emitEvent: false });
+      this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+    });
+  }
+
+  private syncIbsLocalPrestacaoWithPrestadorMunicipio(): void {
+    const codigoMunicipioPrestador = this.form.controls.prestadorCodigoMunicipio.getRawValue();
+    if (this.form.controls.ibsCLocPrestacao.getRawValue() === codigoMunicipioPrestador) {
+      return;
+    }
+
+    this.form.controls.ibsCLocPrestacao.patchValue(codigoMunicipioPrestador, { emitEvent: false });
   }
 }
