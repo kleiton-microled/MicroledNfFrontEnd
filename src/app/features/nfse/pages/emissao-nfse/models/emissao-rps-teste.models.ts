@@ -437,7 +437,6 @@ export function mapFormToProcessarRpsRequest(value: EmissaoRpsTesteFormValue): P
             .split(/\r?\n|,/)
             .map((item) => item.trim())
             .filter((item) => item.length > 0),
-          tpEnteGov: normalizeNullableText(value.ibsTpEnteGov),
           indDest: Number(normalizeNumeric(value.ibsIndDest)),
           dest: {
             cpfCnpj: normalizeNumeric(value.tomadorCpfCnpj),

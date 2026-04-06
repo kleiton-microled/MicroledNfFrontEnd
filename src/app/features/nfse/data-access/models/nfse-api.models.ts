@@ -341,7 +341,8 @@ export interface ProcessarRpsIbsCbsPayload {
   cIndOp: string;
   tpOper: string | null;
   refNfSe: string[];
-  tpEnteGov: string | null;
+  /** Omitido no envio quando nao utilizado (ex.: tipo ente governo desligado no formulario). */
+  tpEnteGov?: string | null;
   indDest: number;
   dest: ProcessarRpsIbsCbsDestPayload;
   cClassTrib: string;

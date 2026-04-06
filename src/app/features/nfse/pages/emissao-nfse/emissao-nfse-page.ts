@@ -42,6 +42,9 @@ const TRIBUTOS_APENAS_API_FORM_KEYS = [
   'tributosValorFinalCobrado',
 ] as const;
 
+/** Campo desabilitado e excluido do JSON de process / gerar arquivo. */
+const IBS_NAO_ENVIADO_FORM_KEYS = ['ibsTpEnteGov'] as const;
+
 @Component({
   selector: 'app-emissao-nfse-page',
   standalone: true,
@@ -100,6 +103,10 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.loadCurrentCertificate();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
+      this.form.get(name)?.disable({ emitEvent: false });
+    }
+
+    for (const name of IBS_NAO_ENVIADO_FORM_KEYS) {
       this.form.get(name)?.disable({ emitEvent: false });
     }
 
@@ -234,6 +241,10 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.resetTaxCalculationState();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
+      this.form.get(name)?.disable({ emitEvent: false });
+    }
+
+    for (const name of IBS_NAO_ENVIADO_FORM_KEYS) {
       this.form.get(name)?.disable({ emitEvent: false });
     }
   }
