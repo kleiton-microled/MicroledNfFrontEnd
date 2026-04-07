@@ -16,6 +16,7 @@ import { merge } from 'rxjs';
 import {
   filterPrestadores,
   filterTomadores,
+  normalizeDigits,
   prestadorTemplateToFormPatch,
   type PrestadorTemplate,
   type TomadorTemplate,
@@ -44,6 +45,11 @@ const TRIBUTOS_APENAS_API_FORM_KEYS = [
 
 /** Campo desabilitado e excluido do JSON de process / gerar arquivo. */
 const IBS_NAO_ENVIADO_FORM_KEYS = ['ibsTpEnteGov'] as const;
+
+/** CNPJ (somente digitos): preenche codigo de servico e NBS automaticamente. */
+const PRESTADOR_CNPJ_CODIGO_SERVICO_NBS = normalizeDigits('02126914000129');
+const PRESTADOR_CODIGO_SERVICO_PADRAO = '02919';
+const PRESTADOR_NBS_PADRAO = '115022000';
 
 @Component({
   selector: 'app-emissao-nfse-page',
@@ -79,6 +85,7 @@ export class EmissaoNfsePageComponent implements OnInit {
           { emitEvent: false },
         );
         this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+        this.applyPrestadorServicoNbsRule();
       }
 
       const prestadorLockedNames = [
@@ -139,6 +146,11 @@ export class EmissaoNfsePageComponent implements OnInit {
       .subscribe(() => this.syncIbsLocalPrestacaoWithPrestadorMunicipio());
 
     this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+    this.applyPrestadorServicoNbsRule();
+
+    this.form.controls.prestadorCpfCnpj.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyPrestadorServicoNbsRule());
 
     merge(
       this.form.controls.tomadorCpfCnpj.valueChanges,
@@ -182,6 +194,7 @@ export class EmissaoNfsePageComponent implements OnInit {
   protected selectPrestador(item: PrestadorTemplate): void {
     this.form.patchValue(prestadorTemplateToFormPatch(item), { emitEvent: false });
     this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+    this.applyPrestadorServicoNbsRule();
     this.showPrestadorSuggestions.set(false);
     this.prestadorMatches.set([]);
   }
@@ -247,6 +260,7 @@ export class EmissaoNfsePageComponent implements OnInit {
         : defaultValue,
     );
     this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+    this.applyPrestadorServicoNbsRule();
     this.facade.resetTaxCalculationState();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
@@ -262,6 +276,7 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.importPendingRps(this.form.getRawValue(), (value) => {
       this.form.patchValue(value, { emitEvent: false });
       this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
+      this.applyPrestadorServicoNbsRule();
     });
   }
 
@@ -272,5 +287,15 @@ export class EmissaoNfsePageComponent implements OnInit {
     }
 
     this.form.controls.ibsCLocPrestacao.patchValue(codigoMunicipioPrestador, { emitEvent: false });
+  }
+
+  private applyPrestadorServicoNbsRule(): void {
+    const cnpj = normalizeDigits(this.form.controls.prestadorCpfCnpj.getRawValue());
+    if (cnpj !== PRESTADOR_CNPJ_CODIGO_SERVICO_NBS) {
+      return;
+    }
+
+    this.form.controls.codigoServico.patchValue(PRESTADOR_CODIGO_SERVICO_PADRAO, { emitEvent: true });
+    this.form.controls.ibsNbs.patchValue(PRESTADOR_NBS_PADRAO, { emitEvent: false });
   }
 }
