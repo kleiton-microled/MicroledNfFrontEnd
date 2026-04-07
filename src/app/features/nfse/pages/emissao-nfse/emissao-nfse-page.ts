@@ -40,6 +40,9 @@ const TRIBUTOS_APENAS_API_FORM_KEYS = [
   'tributosValorINSS',
   'tributosValorIR',
   'tributosValorCSLL',
+  'tributosValorCargaTributaria',
+  'tributosPercentualCargaTributaria',
+  'tributosFonteCargaTributaria',
   'tributosValorFinalCobrado',
 ] as const;
 

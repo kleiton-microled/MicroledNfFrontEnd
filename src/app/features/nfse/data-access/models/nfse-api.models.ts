@@ -309,9 +309,9 @@ export interface ProcessarRpsTributosPayload {
   valorIR: number;
   valorCSLL: number;
   valorIPI: number;
-  valorCargaTributaria: number;
-  percentualCargaTributaria: number;
-  fonteCargaTributaria: string;
+  valorCargaTributaria?: number;
+  percentualCargaTributaria?: number;
+  fonteCargaTributaria?: string;
   valorTotalRecebido: number;
   valorFinalCobrado: number;
   valorMulta: number;
