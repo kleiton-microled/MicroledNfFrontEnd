@@ -12,6 +12,7 @@ import {
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
 import {
+  applyMemoriaCalculoVencimentoDiasCorridos,
   buildNfseSpCalculateTaxesRequest,
   EmissaoRpsTesteFormValue,
   getEmptyCalculatedTributosFromApiPatch,
@@ -111,7 +112,9 @@ export class EmissaoRpsTesteFacade {
       .subscribe({
         next: (response) => {
           onPatch(mapNfseSpCalculateTaxesResponseToFormPatch(response));
-          this._memoriaCalculo.set(response.memoriaCalculo ?? []);
+          this._memoriaCalculo.set(
+            applyMemoriaCalculoVencimentoDiasCorridos(response.memoriaCalculo ?? [], rawForm.dataEmissao),
+          );
           this._taxesCalculatedSuccessfully.set(true);
           this._calculateTaxesErrorMessage.set(null);
         },

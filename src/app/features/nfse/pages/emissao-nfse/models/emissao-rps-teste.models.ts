@@ -329,6 +329,29 @@ export function mapNfseSpCalculateTaxesResponseToFormPatch(
   };
 }
 
+/** Dias corridos (sem ajuste por feriado ou fim de semana) apos a data base da memoria de calculo. */
+const MEMORIA_CALCULO_VENCIMENTO_DIAS_A_FRENTE = 19;
+
+const MEMORIA_CALCULO_VENCIMENTO_LINE = /^(\s*Vencimento\s*:\s*).+$/i;
+
+/**
+ * Substitui linhas `Vencimento: ...` da memoria retornada pela API.
+ * Data base: `dataEmissao` do formulario (yyyy-MM-dd) ou, se vazia, a data local de hoje.
+ */
+export function applyMemoriaCalculoVencimentoDiasCorridos(
+  lines: readonly string[],
+  dataEmissao: string,
+): string[] {
+  const base = parseDataEmissaoLocalDate(dataEmissao.trim()) ?? startOfLocalToday();
+  const vencimento = addCalendarDays(base, MEMORIA_CALCULO_VENCIMENTO_DIAS_A_FRENTE);
+  const textoData = formatDateBr(vencimento);
+
+  return lines.map((line) => {
+    const prefixo = line.match(MEMORIA_CALCULO_VENCIMENTO_LINE);
+    return prefixo ? `${prefixo[1]}${textoData}` : line;
+  });
+}
+
 function formatTaxApiNumber(value: number): string {
   if (value === null || value === undefined || Number.isNaN(value)) {
     return '';
@@ -574,4 +597,42 @@ function sanitizeEmail(value: string | null | undefined): string {
   }
 
   return value.replace(/^\s+/, '').replace(/^\t+/, '').trim();
+}
+
+function parseDataEmissaoLocalDate(value: string): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!iso) {
+    return null;
+  }
+
+  const y = Number(iso[1]);
+  const m = Number(iso[2]);
+  const d = Number(iso[3]);
+  if (m < 1 || m > 12 || d < 1 || d > 31) {
+    return null;
+  }
+
+  return new Date(y, m - 1, d);
+}
+
+function startOfLocalToday(): Date {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+
+function addCalendarDays(date: Date, days: number): Date {
+  const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function formatDateBr(date: Date): string {
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = String(date.getFullYear());
+  return `${dd}/${mm}/${yyyy}`;
 }
