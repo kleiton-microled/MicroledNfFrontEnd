@@ -47,6 +47,20 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
     uf: 'SP',
     cep: '04082-000',
   },
+  {
+    cnpj: '64.777.773/0001-61',
+    inscricaoMunicipal: '',
+    razaoSocial: 'KLEITON EDUARDO DA SILVA FREITAS CONSULTORIA EM TECNOLOGIA DA INFORMACAO LTDA',
+    email: 'kleiton.freitas@kleiton.com.br',
+    tipoLogradouro: 'RUA',
+    logradouro: 'PAIS LEME',
+    numero: '215',
+    complemento: 'CONJ 1713',
+    bairro: 'PINHEIROS',
+    codigoMunicipio: '',
+    uf: 'SP',
+    cep: '05424-150',
+  }
 ];
 
 export const TOMADORES_STORAGE: readonly TomadorTemplate[] = [
