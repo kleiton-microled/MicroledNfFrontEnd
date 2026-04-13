@@ -43,7 +43,7 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
     numero: '00075',
     complemento: 'CJ 21 TORRE A',
     bairro: 'INDIANOPOLIS',
-    codigoMunicipio: '',
+    codigoMunicipio: '3550308',
     uf: 'SP',
     cep: '04082-000',
   },
@@ -57,7 +57,7 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
     numero: '215',
     complemento: 'CONJ 1713',
     bairro: 'PINHEIROS',
-    codigoMunicipio: '',
+    codigoMunicipio: '3550308',
     uf: 'SP',
     cep: '05424-150',
   }
