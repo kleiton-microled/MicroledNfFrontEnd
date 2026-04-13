@@ -94,6 +94,36 @@ export const TOMADORES_STORAGE: readonly TomadorTemplate[] = [
     codigoMunicipio: '3548500',
     cep: '11010-230',
   },
+  {
+    cnpj: '02.390.435/0001-15',
+    inscricaoMunicipal: '3.768.428-0',
+    inscricaoEstadual: '',
+    razaoSocial: 'MICROLED INFORMATICA E SERVICOS LTDA',
+    email: 'ipsilva@microled.com.br',
+    tipoLogradouro: 'AV',
+    logradouro: 'IRAI',
+    numero: '00075',
+    complemento: 'CJ 21 TORRE A',
+    bairro: 'INDIANOPOLIS',
+    uf: 'SP',
+    codigoMunicipio: '3550308',
+    cep: '04082-000',
+  },
+  {
+    cnpj: '09.218.626/0001-43',
+    inscricaoMunicipal: '3.698.180-0',
+    inscricaoEstadual: '',
+    razaoSocial: 'SPLOGICA SISTEMAS E CONSULTORIA LTDA',
+    email: 'ipsilva@microled.com.br',
+    tipoLogradouro: 'AV',
+    logradouro: 'IRAI',
+    numero: '00075',
+    complemento: 'CJ 21 TORRE A',
+    bairro: 'INDIANOPOLIS',
+    uf: 'SP',
+    codigoMunicipio: '3550308',
+    cep: '04082-000',
+  }
 ];
 
 export function normalizeDigits(value: string): string {
