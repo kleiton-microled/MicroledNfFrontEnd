@@ -49,7 +49,7 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
   },
   {
     cnpj: '64.777.773/0001-61',
-    inscricaoMunicipal: '',
+    inscricaoMunicipal: '01555553',
     razaoSocial: 'KLEITON EDUARDO DA SILVA FREITAS CONSULTORIA EM TECNOLOGIA DA INFORMACAO LTDA',
     email: 'kleiton.freitas@kleiton.com.br',
     tipoLogradouro: 'RUA',
