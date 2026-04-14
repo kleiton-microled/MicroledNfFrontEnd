@@ -34,7 +34,7 @@ export interface TomadorTemplate {
 
 export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
   {
-    cnpj: '',
+    cnpj: '02.390.435/0001-15',
     inscricaoMunicipal: '3.768.428-0',
     razaoSocial: 'MICROLED INFORMATICA E SERVICOS LTDA',
     email: 'ipsilva@microled.com.br',
@@ -48,9 +48,23 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
     cep: '04082-000',
   },
   {
+    cnpj: '09.218.626/0001-43',
+    inscricaoMunicipal: '3.698.180-0',
+    razaoSocial: 'SP LOGICA SISTEMAS E CONSULTORIA LTDA',
+    email: 'ipsilva@microled.com.br',
+    tipoLogradouro: 'AV',
+    logradouro: 'IRAI',
+    numero: '00075',
+    complemento: 'CJ 21 TORRE A',
+    bairro: 'INDIANOPOLIS',
+    codigoMunicipio: '3550308',
+    uf: 'SP',
+    cep: '04082-000',
+  },
+  {
     cnpj: '64.777.773/0001-61',
     inscricaoMunicipal: '01555553',
-    razaoSocial: 'KLEITON EDUARDO DA SILVA FREITAS CONSULTORIA EM TECNOLOGIA DA INFORMACAO LTDA',
+    razaoSocial: 'KLEITON EDUARDO DA SILVA FREITAS CONSULTORIA EM TECNOLOGIA..',
     email: 'kleiton.freitas@kleiton.com.br',
     tipoLogradouro: 'RUA',
     logradouro: 'PAIS LEME',
