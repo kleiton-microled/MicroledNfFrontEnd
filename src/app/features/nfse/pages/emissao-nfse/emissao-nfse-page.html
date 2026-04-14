@@ -720,7 +720,7 @@
             type="button"
             class="btn btn-success"
             [disabled]="facade.isProcessing() || !facade.taxesCalculatedSuccessfully()"
-            (click)="processRps()"
+            (click)="confirmProcessRps()"
           >
             @if (facade.isProcessing()) {
               <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>

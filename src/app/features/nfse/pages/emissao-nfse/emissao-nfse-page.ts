@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { merge } from 'rxjs';
+import Swal from 'sweetalert2';
 
 import {
   filterPrestadores,
@@ -236,8 +237,25 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.generateFiles(mapFormToGerarArquivoRpsRequest(this.form.getRawValue()));
   }
 
-  protected processRps(): void {
+  protected async confirmProcessRps(): Promise<void> {
     if (!this.facade.taxesCalculatedSuccessfully()) {
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: 'Confirmar envio da nota?',
+      html:
+        '<p class="text-start mb-2">Ao confirmar, o sistema irá <strong>criar e enviar</strong> a nota fiscal (processamento do RPS).</p>' +
+        '<p class="text-start mb-0">Deseja continuar?</p>',
+      icon: 'warning',
+      showCancelButton: true,
+      focusCancel: true,
+      confirmButtonText: 'Sim, enviar nota',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
 

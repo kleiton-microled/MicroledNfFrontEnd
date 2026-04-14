@@ -30,7 +30,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "src/styles.scss",
+              "node_modules/sweetalert2/dist/sweetalert2.min.css"
+            ],
+            "allowedCommonJsDependencies": ["sweetalert2"]
           },
           "configurations": {
             "production": {
