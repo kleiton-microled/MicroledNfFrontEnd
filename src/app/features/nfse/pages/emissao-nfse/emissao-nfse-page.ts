@@ -19,6 +19,7 @@ import {
   filterTomadores,
   normalizeDigits,
   prestadorTemplateToFormPatch,
+  resolveUniquePrestadorTemplate,
   type PrestadorTemplate,
   type TomadorTemplate,
   tomadorTemplateToFormPatch,
@@ -88,6 +89,7 @@ export class EmissaoNfsePageComponent implements OnInit {
           applyCertificateToEmissaoRpsTesteFormValue(this.form.getRawValue(), currentCertificate),
           { emitEvent: false },
         );
+        this.applyPrestadorCadastroLocalIfUnambiguous();
         this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
         this.applyPrestadorServicoNbsRule();
       }
@@ -280,6 +282,9 @@ export class EmissaoNfsePageComponent implements OnInit {
         ? applyCertificateToEmissaoRpsTesteFormValue(defaultValue, currentCertificate)
         : defaultValue,
     );
+    if (currentCertificate) {
+      this.applyPrestadorCadastroLocalIfUnambiguous();
+    }
     this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
     this.applyPrestadorServicoNbsRule();
     this.facade.resetTaxCalculationState();
@@ -318,5 +323,15 @@ export class EmissaoNfsePageComponent implements OnInit {
 
     this.form.controls.codigoServico.patchValue(PRESTADOR_CODIGO_SERVICO_PADRAO, { emitEvent: true });
     this.form.controls.ibsNbs.patchValue(PRESTADOR_NBS_PADRAO, { emitEvent: false });
+  }
+
+  /** Aplica email/endereco do cadastro local quando o certificado ja identifica um unico prestador. */
+  private applyPrestadorCadastroLocalIfUnambiguous(): void {
+    const raw = this.form.getRawValue();
+    const resolved = resolveUniquePrestadorTemplate(raw.prestadorCpfCnpj, raw.prestadorRazaoSocial);
+    if (!resolved) {
+      return;
+    }
+    this.form.patchValue(prestadorTemplateToFormPatch(resolved), { emitEvent: false });
   }
 }
