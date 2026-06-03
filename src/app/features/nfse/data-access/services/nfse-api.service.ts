@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 import {
+  ApiEnvelopeResponse,
   ApiListResponse,
   CancelarNfsePayload,
   CancelarNotaFiscalRequest,
@@ -209,10 +210,22 @@ export class NfseApiService {
 
   searchNotasFiscais(filter: NotaFiscalFilter): Observable<PagedNotaFiscalResponse> {
     return this.http
-      .get<PagedNotaFiscalResponse>(this.notasFiscaisApiUrl, {
+      .get<ApiEnvelopeResponse<PagedNotaFiscalResponse>>(this.notasFiscaisApiUrl, {
         params: this.buildParams(filter),
       })
-      .pipe(catchError((error) => this.handleError('listagem de notas fiscais', error)));
+      .pipe(
+        map((envelope) => {
+          if (!envelope.success) {
+            throw new NfseApiError(
+              envelope.message?.trim() || 'Nao foi possivel carregar as notas fiscais.',
+              200,
+            );
+          }
+
+          return envelope.data;
+        }),
+        catchError((error) => this.handleError('listagem de notas fiscais', error)),
+      );
   }
 
   private buildUrl(path: string): string {

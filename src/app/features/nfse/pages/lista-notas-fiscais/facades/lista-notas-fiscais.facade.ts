@@ -50,9 +50,9 @@ export class ListaNotasFiscaisFacade {
       .pipe(finalize(() => this._isLoading.set(false)))
       .subscribe({
         next: (response) => {
-          this._items.set(response.items);
-          this._totalCount.set(response.totalCount);
-          this._totalPages.set(response.totalPages);
+          this._items.set(response.items ?? []);
+          this._totalCount.set(response.totalCount ?? 0);
+          this._totalPages.set(response.totalPages ?? 0);
         },
         error: (error: unknown) => {
           this._items.set([]);

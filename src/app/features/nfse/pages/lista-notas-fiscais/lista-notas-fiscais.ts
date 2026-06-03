@@ -29,6 +29,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'autorizada':
+      case 'authorized':
         return 'text-bg-success';
       case 'cancelada':
         return 'text-bg-danger';

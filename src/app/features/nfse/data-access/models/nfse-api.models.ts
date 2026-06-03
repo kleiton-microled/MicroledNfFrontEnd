@@ -7,6 +7,13 @@ export interface ApiListResponse<T> {
   pageSize: number;
 }
 
+/** Envelope padrao da API externa de notas fiscais (amktechsistemas). */
+export interface ApiEnvelopeResponse<T> {
+  success: boolean;
+  message: string | null;
+  data: T;
+}
+
 export interface NfseApiErrorDetails {
   code?: string;
   fields?: Record<string, string[]>;
