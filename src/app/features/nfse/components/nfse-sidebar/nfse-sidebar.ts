@@ -21,5 +21,6 @@ export class NfseSidebarComponent {
     { label: 'Emissao NFSe', route: '/nfse/emissao-nfse' },
     { label: 'Cancelamento NFSe', route: '/nfse/cancelamento-nfse' },
     { label: 'Configuracoes NFSe', route: '/nfse/configuracoes-nfse' },
+    { label: 'Lista de NFs', route: '/nfse/lista-notas-fiscais' },
   ];
 }

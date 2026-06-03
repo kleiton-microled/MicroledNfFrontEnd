@@ -42,6 +42,13 @@ export const NFSE_ROUTES: Routes = [
             (m) => m.ConfiguracoesNfsePageComponent,
           ),
       },
+      {
+        path: 'lista-notas-fiscais',
+        loadComponent: () =>
+          import('./pages/lista-notas-fiscais/lista-notas-fiscais').then(
+            (m) => m.ListaNotasFiscaisComponent,
+          ),
+      },
     ],
   },
 ];

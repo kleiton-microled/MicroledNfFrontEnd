@@ -522,3 +522,42 @@ export interface ConsultarStatusRpsResponse {
   resultadoOperacao: string | null;
   erros: string[];
 }
+
+export interface NotaFiscalFilter {
+  page?: number;
+  pageSize?: number;
+  numeroNota?: string;
+  cpfCnpjTomador?: string;
+  status?: string;
+  [key: string]: QueryParamValue;
+}
+
+export interface NotaFiscalItemResponse {
+  id: string;
+  protocolo?: string;
+  numeroNota?: string;
+  codigoVerificacao?: string;
+  numeroLote?: string;
+  numeroRps?: string;
+  serieRps?: string;
+  inscricaoPrestador?: string;
+  cnpjPrestador?: string;
+  cpfCnpjTomador?: string;
+  status: string;
+  dataEmissao?: string;
+  dataCancelamento?: string;
+  criadoPor: string;
+  alteradoPor?: string;
+  criadoEm: string;
+  alteradoEm?: string;
+  hasPdf: boolean;
+  hasXml: boolean;
+}
+
+export interface PagedNotaFiscalResponse {
+  items: NotaFiscalItemResponse[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}

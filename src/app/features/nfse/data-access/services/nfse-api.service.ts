@@ -28,7 +28,9 @@ import {
   NfseResumoResponse,
   NfseSpCalculateTaxesRequest,
   NfseSpCalculateTaxesResponse,
+  NotaFiscalFilter,
   OperacaoNfseResponse,
+  PagedNotaFiscalResponse,
   PendingRpsResponse,
   ProcessarRpsRequest,
   ProcessarRpsResponse,
@@ -47,6 +49,7 @@ import {
   LOCAL_RPS_STATUS_API_URL,
   LOCAL_RPS_GENERATE_FILES_API_URL,
   NFSE_API_BASE_URL,
+  NOTAS_FISCAIS_API_URL,
 } from '../tokens/nfse-api-base-url.token';
 
 @Injectable({
@@ -64,6 +67,7 @@ export class NfseApiService {
   private readonly localRpsStatusApiUrl = inject(LOCAL_RPS_STATUS_API_URL);
   private readonly localAccessPendingRpsApiUrl = inject(LOCAL_ACCESS_PENDING_RPS_API_URL);
   private readonly localNfseSpCalculateTaxesApiUrl = inject(LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL);
+  private readonly notasFiscaisApiUrl = inject(NOTAS_FISCAIS_API_URL);
 
   consultarNfsePorNumero(numero: string): Observable<NfseDetalheResponse> {
     return this.http
@@ -201,6 +205,14 @@ export class NfseApiService {
     return this.http
       .post<OperacaoNfseResponse>(this.buildUrl('notas/cancelamentos'), payload)
       .pipe(catchError((error) => this.handleError('cancelamento de NFSe', error)));
+  }
+
+  searchNotasFiscais(filter: NotaFiscalFilter): Observable<PagedNotaFiscalResponse> {
+    return this.http
+      .get<PagedNotaFiscalResponse>(this.notasFiscaisApiUrl, {
+        params: this.buildParams(filter),
+      })
+      .pipe(catchError((error) => this.handleError('listagem de notas fiscais', error)));
   }
 
   private buildUrl(path: string): string {
