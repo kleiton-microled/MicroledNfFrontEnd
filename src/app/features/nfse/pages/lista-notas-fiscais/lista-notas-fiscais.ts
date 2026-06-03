@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
@@ -16,7 +16,7 @@ interface RowDraft {
 @Component({
   selector: 'app-lista-notas-fiscais',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule],
   templateUrl: './lista-notas-fiscais.html',
   styleUrl: './lista-notas-fiscais.scss',
   providers: [ListaNotasFiscaisFacade],
@@ -70,7 +70,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
       return;
     }
 
-    (draft as Record<string, unknown>)[field] = value;
+    (draft as unknown as Record<string, unknown>)[field] = value;
 
     if (field === 'pago' && !value) {
       draft.dataPagamento = '';
