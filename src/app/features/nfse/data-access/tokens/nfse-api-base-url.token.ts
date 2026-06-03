@@ -5,7 +5,7 @@ export const NFSE_API_BASE_URL = new InjectionToken<string>('NFSE_API_BASE_URL',
 });
 
 export const NOTAS_FISCAIS_API_URL = new InjectionToken<string>('NOTAS_FISCAIS_API_URL', {
-  factory: () => 'http://localhost:5249/api/v1/notas-fiscais',
+  factory: () => 'https://amktechsistemas.com.br/api/v1/notas-fiscais',
 });
 
 export const CERTIFICATES_API_URL = new InjectionToken<string>('CERTIFICATES_API_URL', {
