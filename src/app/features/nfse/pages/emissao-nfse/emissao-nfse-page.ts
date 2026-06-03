@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { merge } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -31,6 +32,7 @@ import {
   mapFormToGerarArquivoRpsRequest,
   mapFormToProcessarRpsRequest,
 } from './models/emissao-rps-teste.models';
+import { ReenvioNotaState } from '../lista-notas-fiscais/models/reenvio-nota-state';
 
 const TRIBUTOS_APENAS_API_FORM_KEYS = [
   'tributosBaseCalculoIss',
@@ -67,6 +69,7 @@ const PRESTADOR_NBS_PADRAO = '115022000';
 export class EmissaoNfsePageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   protected readonly facade = inject(EmissaoRpsTesteFacade);
   protected readonly form = this.formBuilder.nonNullable.group(getDefaultEmissaoRpsTesteFormValue());
@@ -114,6 +117,7 @@ export class EmissaoNfsePageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.applyReenvioStateIfPresent();
     this.facade.loadCurrentCertificate();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
@@ -333,5 +337,38 @@ export class EmissaoNfsePageComponent implements OnInit {
       return;
     }
     this.form.patchValue(prestadorTemplateToFormPatch(resolved), { emitEvent: false });
+  }
+
+  private applyReenvioStateIfPresent(): void {
+    const navState = this.router.getCurrentNavigation()?.extras.state;
+    const source = (navState ?? history.state) as Record<string, unknown>;
+    const reenvio = source?.['reenvio'];
+
+    if (!reenvio || typeof reenvio !== 'object') {
+      return;
+    }
+
+    const state = reenvio as ReenvioNotaState;
+    const patch: Partial<{ numeroRps: string; serieRps: string; tomadorCpfCnpj: string; dataEmissao: string }> = {};
+
+    if (state.numeroRps) {
+      patch.numeroRps = state.numeroRps;
+    }
+
+    if (state.serieRps) {
+      patch.serieRps = state.serieRps;
+    }
+
+    if (state.cpfCnpjTomador) {
+      patch.tomadorCpfCnpj = state.cpfCnpjTomador;
+    }
+
+    if (state.dataEmissao) {
+      patch.dataEmissao = state.dataEmissao;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      this.form.patchValue(patch, { emitEvent: false });
+    }
   }
 }

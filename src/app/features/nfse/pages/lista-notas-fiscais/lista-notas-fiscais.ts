@@ -1,11 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { ListaNotasFiscaisFacade } from './facades/lista-notas-fiscais.facade';
 import { NfseApiService } from '../../data-access/services/nfse-api.service';
 import { NfseApiError, NotaFiscalItemResponse } from '../../data-access/models/nfse-api.models';
+import { ReenvioNotaState } from './models/reenvio-nota-state';
 
 interface RowDraft {
   pago: boolean;
@@ -24,6 +26,7 @@ interface RowDraft {
 export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly facade = inject(ListaNotasFiscaisFacade);
   private readonly nfseApiService = inject(NfseApiService);
+  private readonly router = inject(Router);
 
   protected readonly expandedId = signal<string | null>(null);
   protected readonly savingId = signal<string | null>(null);
@@ -146,5 +149,18 @@ export class ListaNotasFiscaisComponent implements OnInit {
 
   protected hasEventos(item: NotaFiscalItemResponse): boolean {
     return (item.erros?.length ?? 0) > 0 || (item.alertas?.length ?? 0) > 0;
+  }
+
+  protected reenviarNota(item: NotaFiscalItemResponse): void {
+    const state: ReenvioNotaState = {
+      numeroRps: item.numeroRps,
+      serieRps: item.serieRps,
+      cpfCnpjTomador: item.cpfCnpjTomador,
+      dataEmissao: item.dataEmissao
+        ? item.dataEmissao.substring(0, 10)
+        : undefined,
+    };
+
+    void this.router.navigate(['/nfse/emissao-nfse'], { state: { reenvio: state } });
   }
 }
