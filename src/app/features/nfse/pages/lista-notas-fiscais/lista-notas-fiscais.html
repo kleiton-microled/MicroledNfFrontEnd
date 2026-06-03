@@ -44,29 +44,36 @@
             </thead>
             <tbody>
               @for (item of facade.items(); track item.id) {
-                <tr>
+                <tr [class.nf-row-expanded]="isExpanded(item.id)">
                   <td class="px-4 fw-semibold">{{ item.numeroNota ?? '-' }}</td>
                   <td>{{ item.cpfCnpjTomador ?? '-' }}</td>
                   <td>
-                    <div class="d-inline-flex align-items-center gap-1">
+                    @if (hasEventos(item)) {
+                      <button
+                        type="button"
+                        class="nf-status-btn"
+                        (click)="toggleAccordion(item.id)"
+                        [attr.aria-expanded]="isExpanded(item.id)"
+                        title="Clique para ver erros/alertas"
+                      >
+                        <span class="badge" [class]="getStatusClass(item.status)">
+                          {{ item.status }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
+                             class="nf-evento-icon text-warning" viewBox="0 0 16 16">
+                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                          <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor"
+                             class="nf-chevron" [class.nf-chevron-open]="isExpanded(item.id)" viewBox="0 0 16 16">
+                          <path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                      </button>
+                    } @else {
                       <span class="badge" [class]="getStatusClass(item.status)">
                         {{ item.status }}
                       </span>
-                      @if (hasEventos(item)) {
-                        <span class="nf-evento-trigger">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
-                               class="text-warning" viewBox="0 0 16 16" aria-label="Alertas/erros">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                          </svg>
-                          <span class="nf-evento-tooltip">
-                            @for (line of buildTooltipLines(item); track $index) {
-                              <span class="nf-evento-line">{{ line }}</span>
-                            }
-                          </span>
-                        </span>
-                      }
-                    </div>
+                    }
                   </td>
                   <td>{{ (item.dataEmissao | date: 'dd/MM/yyyy') ?? '-' }}</td>
                   <td>{{ item.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</td>
@@ -85,6 +92,51 @@
                     }
                   </td>
                 </tr>
+
+                @if (hasEventos(item) && isExpanded(item.id)) {
+                  <tr class="nf-accordion-row">
+                    <td colspan="7" class="p-0">
+                      <div class="nf-accordion-body">
+
+                        @if ((item.erros?.length ?? 0) > 0) {
+                          <div class="nf-evento-group">
+                            <span class="nf-evento-group-label nf-label-erro">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                              </svg>
+                              Erros ({{ item.erros!.length }})
+                            </span>
+                            @for (e of item.erros!; track e.codigo) {
+                              <div class="nf-evento-item nf-item-erro">
+                                <span class="nf-evento-codigo">{{ e.codigo }}</span>
+                                <span class="nf-evento-descricao">{{ e.descricao }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        @if ((item.alertas?.length ?? 0) > 0) {
+                          <div class="nf-evento-group">
+                            <span class="nf-evento-group-label nf-label-alerta">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                              </svg>
+                              Alertas ({{ item.alertas!.length }})
+                            </span>
+                            @for (a of item.alertas!; track a.codigo) {
+                              <div class="nf-evento-item nf-item-alerta">
+                                <span class="nf-evento-codigo">{{ a.codigo }}</span>
+                                <span class="nf-evento-descricao">{{ a.descricao }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>

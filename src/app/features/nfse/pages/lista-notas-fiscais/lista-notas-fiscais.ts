@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 import { ListaNotasFiscaisFacade } from './facades/lista-notas-fiscais.facade';
@@ -14,6 +14,7 @@ import { NotaFiscalItemResponse } from '../../data-access/models/nfse-api.models
 })
 export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly facade = inject(ListaNotasFiscaisFacade);
+  protected readonly expandedId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.facade.loadPage();
@@ -27,6 +28,14 @@ export class ListaNotasFiscaisComponent implements OnInit {
     this.facade.previousPage();
   }
 
+  protected toggleAccordion(id: string): void {
+    this.expandedId.set(this.expandedId() === id ? null : id);
+  }
+
+  protected isExpanded(id: string): boolean {
+    return this.expandedId() === id;
+  }
+
   protected getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'autorizada':
@@ -37,6 +46,9 @@ export class ListaNotasFiscaisComponent implements OnInit {
       case 'pendente':
         return 'text-bg-warning';
       case 'rejeitada':
+      case 'rejected':
+        return 'text-bg-danger';
+      case 'error':
         return 'text-bg-danger';
       default:
         return 'text-bg-secondary';
@@ -45,16 +57,5 @@ export class ListaNotasFiscaisComponent implements OnInit {
 
   protected hasEventos(item: NotaFiscalItemResponse): boolean {
     return (item.erros?.length ?? 0) > 0 || (item.alertas?.length ?? 0) > 0;
-  }
-
-  protected buildTooltipLines(item: NotaFiscalItemResponse): string[] {
-    const lines: string[] = [];
-    for (const e of item.erros ?? []) {
-      lines.push(`[ERRO ${e.codigo}] ${e.descricao}`);
-    }
-    for (const a of item.alertas ?? []) {
-      lines.push(`[ALERTA ${a.codigo}] ${a.descricao}`);
-    }
-    return lines;
   }
 }

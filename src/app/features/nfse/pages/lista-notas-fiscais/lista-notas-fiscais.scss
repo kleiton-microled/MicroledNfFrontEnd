@@ -8,61 +8,115 @@
   background-color: #f8f9fa;
 }
 
-.nf-evento-trigger {
-  position: relative;
+// Botão invisível que envolve badge + ícones clicáveis
+.nf-status-btn {
   display: inline-flex;
   align-items: center;
-  cursor: default;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 
-  svg {
-    display: block;
-  }
-
-  &:hover .nf-evento-tooltip {
-    opacity: 1;
-    visibility: visible;
+  &:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
-.nf-evento-tooltip {
-  opacity: 0;
-  visibility: hidden;
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background: #1e293b;
-  color: #f1f5f9;
+.nf-evento-icon {
+  flex-shrink: 0;
+}
+
+.nf-chevron {
+  flex-shrink: 0;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+
+  &.nf-chevron-open {
+    transform: rotate(180deg);
+  }
+}
+
+// Linha da tabela quando expandida
+.nf-row-expanded td {
+  background-color: #f8f9ff;
+}
+
+// Linha do accordion (sem borda separadora visual)
+.nf-accordion-row {
+  td {
+    border-top: none;
+  }
+}
+
+// Corpo do accordion
+.nf-accordion-body {
+  padding: 12px 24px 16px;
+  background-color: #f8f9ff;
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Grupo de erros ou alertas
+.nf-evento-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nf-evento-group-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+
+  &.nf-label-erro {
+    color: #dc3545;
+  }
+
+  &.nf-label-alerta {
+    color: #f59e0b;
+  }
+}
+
+// Cada linha de erro/alerta
+.nf-evento-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 12px;
   border-radius: 6px;
-  padding: 8px 10px;
-  min-width: 260px;
-  max-width: 380px;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  white-space: normal;
-  word-break: break-word;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  transition: opacity 0.15s ease, visibility 0.15s ease;
-  pointer-events: none;
+  font-size: 0.85rem;
+  line-height: 1.5;
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #1e293b;
+  &.nf-item-erro {
+    background-color: #fff5f5;
+    border-left: 3px solid #dc3545;
+  }
+
+  &.nf-item-alerta {
+    background-color: #fffbeb;
+    border-left: 3px solid #f59e0b;
   }
 }
 
-.nf-evento-line {
-  display: block;
+.nf-evento-codigo {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: #374151;
+  min-width: 38px;
+}
 
-  & + & {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-  }
+.nf-evento-descricao {
+  color: #374151;
 }
