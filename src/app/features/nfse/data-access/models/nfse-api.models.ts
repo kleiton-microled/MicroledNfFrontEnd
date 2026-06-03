@@ -564,6 +564,9 @@ export interface NotaFiscalItemResponse {
   alteradoEm?: string;
   hasPdf: boolean;
   hasXml: boolean;
+  pago?: boolean;
+  dataPagamento?: string;
+  valorDepositado?: number;
   erros?: NotaFiscalEventoItem[];
   alertas?: NotaFiscalEventoItem[];
 }

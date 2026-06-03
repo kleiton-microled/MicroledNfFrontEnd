@@ -120,3 +120,52 @@
 .nf-evento-descricao {
   color: #374151;
 }
+
+// Inputs compactos para pago/data/valor
+.nf-input-pago {
+  font-size: 0.8rem;
+  min-width: 110px;
+  border-color: transparent;
+  background-color: transparent;
+  padding-inline: 4px;
+
+  &:focus {
+    border-color: #86b7fe;
+    background-color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  }
+
+  &:disabled {
+    background-color: transparent;
+    border-color: transparent;
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// Botao de salvar por linha
+.nf-save-btn {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Estado de sucesso brevemente exibido apos salvar
+.nf-saved {
+  color: #fff;
+  background-color: #198754;
+  border-color: #198754;
+
+  &:hover {
+    background-color: #157347;
+    border-color: #146c43;
+  }
+}

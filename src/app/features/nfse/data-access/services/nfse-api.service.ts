@@ -30,6 +30,7 @@ import {
   NfseSpCalculateTaxesRequest,
   NfseSpCalculateTaxesResponse,
   NotaFiscalFilter,
+  NotaFiscalItemResponse,
   OperacaoNfseResponse,
   PagedNotaFiscalResponse,
   PendingRpsResponse,
@@ -206,6 +207,18 @@ export class NfseApiService {
     return this.http
       .post<OperacaoNfseResponse>(this.buildUrl('notas/cancelamentos'), payload)
       .pipe(catchError((error) => this.handleError('cancelamento de NFSe', error)));
+  }
+
+  atualizarPagamento(
+    id: string,
+    body: { pago: boolean; dataPagamento?: string; valorDepositado?: number; alteradoPor?: string },
+  ): Observable<ApiEnvelopeResponse<NotaFiscalItemResponse>> {
+    return this.http
+      .patch<ApiEnvelopeResponse<NotaFiscalItemResponse>>(
+        `${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}/pagamento`,
+        body,
+      )
+      .pipe(catchError((error) => this.handleError('atualizacao de pagamento', error)));
   }
 
   searchNotasFiscais(filter: NotaFiscalFilter): Observable<PagedNotaFiscalResponse> {
