@@ -539,6 +539,11 @@ export interface NotaFiscalFilter {
   [key: string]: QueryParamValue;
 }
 
+export interface NotaFiscalEventoItem {
+  codigo: string;
+  descricao: string;
+}
+
 export interface NotaFiscalItemResponse {
   id: string;
   protocolo?: string;
@@ -559,6 +564,8 @@ export interface NotaFiscalItemResponse {
   alteradoEm?: string;
   hasPdf: boolean;
   hasXml: boolean;
+  erros?: NotaFiscalEventoItem[];
+  alertas?: NotaFiscalEventoItem[];
 }
 
 export interface PagedNotaFiscalResponse {
