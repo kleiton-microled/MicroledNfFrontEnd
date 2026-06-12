@@ -129,6 +129,20 @@ export class ListaNotasFiscaisComponent implements OnInit {
       });
   }
 
+  protected getStatusLabel(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'authorized':
+        return 'Autorizada';
+      default:
+        return status ?? '-';
+    }
+  }
+
+  protected isAuthorized(status: string): boolean {
+    const normalized = status?.toLowerCase();
+    return normalized === 'authorized' || normalized === 'autorizada';
+  }
+
   protected getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
       case 'autorizada':

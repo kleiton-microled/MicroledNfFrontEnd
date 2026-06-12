@@ -62,7 +62,7 @@
                         title="Clique para ver erros/alertas"
                       >
                         <span class="badge" [class]="getStatusClass(item.status)">
-                          {{ item.status }}
+                          {{ getStatusLabel(item.status) }}
                         </span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
                              class="nf-evento-icon text-warning" viewBox="0 0 16 16">
@@ -76,7 +76,7 @@
                       </button>
                     } @else {
                       <span class="badge" [class]="getStatusClass(item.status)">
-                        {{ item.status }}
+                        {{ getStatusLabel(item.status) }}
                       </span>
                     }
                   </td>
@@ -140,19 +140,21 @@
                           <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                         </svg>
                       }
-                      Consultar
+                      Atualizar
                     </button>
-                    <button
-                      type="button"
-                      class="nf-reenviar-btn btn btn-outline-secondary btn-sm"
-                      (click)="reenviarNota(item)"
-                      title="Reenviar nota com estes dados"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
-                      </svg>
-                      Reenviar
-                    </button>
+                    @if (!isAuthorized(item.status)) {
+                      <button
+                        type="button"
+                        class="nf-reenviar-btn btn btn-outline-secondary btn-sm"
+                        (click)="reenviarNota(item)"
+                        title="Reenviar nota com estes dados"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                        </svg>
+                        Reenviar
+                      </button>
+                    }
                     <button
                       type="button"
                       class="nf-save-btn btn btn-outline-primary btn-sm"
