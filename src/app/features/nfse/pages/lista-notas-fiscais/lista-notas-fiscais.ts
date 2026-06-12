@@ -6,7 +6,7 @@ import { finalize } from 'rxjs';
 
 import { ListaNotasFiscaisFacade } from './facades/lista-notas-fiscais.facade';
 import { NfseApiService } from '../../data-access/services/nfse-api.service';
-import { NfseApiError, NotaFiscalItemResponse } from '../../data-access/models/nfse-api.models';
+import { NfseApiError, NotaFiscalItemResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
 import { ReenvioNotaState } from './models/reenvio-nota-state';
 
 interface RowDraft {
@@ -31,6 +31,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly expandedId = signal<string | null>(null);
   protected readonly savingId = signal<string | null>(null);
   protected readonly savedId = signal<string | null>(null);
+  protected readonly consultandoProtocoloId = signal<string | null>(null);
   protected readonly rowDrafts = new Map<string, RowDraft>();
 
   ngOnInit(): void {
@@ -149,6 +150,39 @@ export class ListaNotasFiscaisComponent implements OnInit {
 
   protected hasEventos(item: NotaFiscalItemResponse): boolean {
     return (item.erros?.length ?? 0) > 0 || (item.alertas?.length ?? 0) > 0;
+  }
+
+  protected consultarProtocolo(item: NotaFiscalItemResponse): void {
+    if (!item.protocolo || !item.cnpjPrestador) {
+      alert('Nota sem protocolo ou CNPJ do prestador — nao e possivel consultar.');
+      return;
+    }
+
+    if (this.consultandoProtocoloId() === item.id) {
+      return;
+    }
+
+    this.consultandoProtocoloId.set(item.id);
+
+    this.nfseApiService
+      .consultarStatusRps({ numeroProtocolo: item.protocolo, cnpjRemetente: item.cnpjPrestador })
+      .pipe(finalize(() => this.consultandoProtocoloId.set(null)))
+      .subscribe({
+        next: (res: ConsultarStatusRpsResponse) => {
+          if (res.sucesso) {
+            this.facade.loadPage();
+          } else {
+            const erros = res.erros?.join('\n') ?? 'Erro desconhecido';
+            alert(`Consulta retornou erro:\n${erros}`);
+          }
+        },
+        error: (error: unknown) => {
+          const message = error instanceof NfseApiError
+            ? error.message
+            : 'Nao foi possivel consultar o protocolo.';
+          alert(message);
+        },
+      });
   }
 
   protected reenviarNota(item: NotaFiscalItemResponse): void {
