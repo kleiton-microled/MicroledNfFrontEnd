@@ -32,6 +32,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly savingId = signal<string | null>(null);
   protected readonly savedId = signal<string | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
+  protected readonly baixandoPdfId = signal<string | null>(null);
   protected readonly rowDrafts = new Map<string, RowDraft>();
 
   ngOnInit(): void {
@@ -194,6 +195,31 @@ export class ListaNotasFiscaisComponent implements OnInit {
           const message = error instanceof NfseApiError
             ? error.message
             : 'Nao foi possivel consultar o protocolo.';
+          alert(message);
+        },
+      });
+  }
+
+  protected downloadPdf(item: NotaFiscalItemResponse): void {
+    if (this.baixandoPdfId() === item.id) return;
+    this.baixandoPdfId.set(item.id);
+
+    this.nfseApiService
+      .downloadPdfNotaFiscal(item.id)
+      .pipe(finalize(() => this.baixandoPdfId.set(null)))
+      .subscribe({
+        next: (blob: Blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `nota-fiscal-${item.numeroNota ?? item.id}.pdf`;
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        error: (error: unknown) => {
+          const message = error instanceof NfseApiError
+            ? error.message
+            : 'Nao foi possivel baixar o PDF.';
           alert(message);
         },
       });

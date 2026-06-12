@@ -209,6 +209,14 @@ export class NfseApiService {
       .pipe(catchError((error) => this.handleError('cancelamento de NFSe', error)));
   }
 
+  downloadPdfNotaFiscal(id: string): Observable<Blob> {
+    return this.http
+      .get(`${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}/pdf`, {
+        responseType: 'blob',
+      })
+      .pipe(catchError((error) => this.handleError('download do PDF da nota fiscal', error)));
+  }
+
   atualizarPagamento(
     id: string,
     body: { pago: boolean; dataPagamento?: string; valorDepositado?: number; alteradoPor?: string },
