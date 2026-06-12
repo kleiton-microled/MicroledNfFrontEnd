@@ -43,6 +43,7 @@
                 <th scope="col">Pago</th>
                 <th scope="col">Data Pagamento</th>
                 <th scope="col">Valor Depositado</th>
+                <th scope="col">Protocolo</th>
                 <th scope="col">Acoes</th>
               </tr>
             </thead>
@@ -123,6 +124,7 @@
                       (change)="onFieldChange(item.id, 'valorDepositado', $any($event.target).value !== '' ? +$any($event.target).value : null)"
                     />
                   </td>
+                  <td>{{ item.protocolo ?? '-' }}</td>
                   <td class="d-flex gap-1 flex-wrap">
                     <button
                       type="button"
@@ -161,7 +163,7 @@
 
                 @if (hasEventos(item) && isExpanded(item.id)) {
                   <tr class="nf-accordion-row">
-                    <td colspan="11" class="p-0">
+                    <td colspan="12" class="p-0">
                       <div class="nf-accordion-body">
 
                         @if ((item.erros?.length ?? 0) > 0) {
