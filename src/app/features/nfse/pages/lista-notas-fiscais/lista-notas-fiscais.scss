@@ -3,12 +3,11 @@
 }
 
 .empty-state {
-  border: 1px dashed #ced4da;
-  border-radius: 1rem;
-  background-color: #f8f9fa;
+  border: 1px dashed var(--tm-border);
+  border-radius: var(--tm-radius-xl);
+  background-color: var(--tm-muted);
 }
 
-// Botão invisível que envolve badge + ícones clicáveis
 .nf-status-btn {
   display: inline-flex;
   align-items: center;
@@ -19,7 +18,7 @@
   cursor: pointer;
 
   &:focus-visible {
-    outline: 2px solid #0d6efd;
+    outline: 2px solid var(--tm-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -31,7 +30,7 @@
 
 .nf-chevron {
   flex-shrink: 0;
-  color: #6c757d;
+  color: var(--tm-muted-fg);
   transition: transform 0.2s ease;
 
   &.nf-chevron-open {
@@ -39,29 +38,23 @@
   }
 }
 
-// Linha da tabela quando expandida
 .nf-row-expanded td {
-  background-color: #f8f9ff;
+  background-color: var(--tm-primary-soft);
 }
 
-// Linha do accordion (sem borda separadora visual)
-.nf-accordion-row {
-  td {
-    border-top: none;
-  }
+.nf-accordion-row td {
+  border-top: none;
 }
 
-// Corpo do accordion
 .nf-accordion-body {
   padding: 12px 24px 16px;
-  background-color: #f8f9ff;
-  border-bottom: 2px solid #e2e8f0;
+  background-color: var(--tm-primary-soft);
+  border-bottom: 2px solid var(--tm-border);
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-// Grupo de erros ou alertas
 .nf-evento-group {
   display: flex;
   flex-direction: column;
@@ -79,32 +72,31 @@
   margin-bottom: 2px;
 
   &.nf-label-erro {
-    color: #dc3545;
+    color: var(--tm-danger);
   }
 
   &.nf-label-alerta {
-    color: #f59e0b;
+    color: var(--tm-warning);
   }
 }
 
-// Cada linha de erro/alerta
 .nf-evento-item {
   display: flex;
   align-items: baseline;
   gap: 10px;
   padding: 7px 12px;
-  border-radius: 6px;
+  border-radius: var(--tm-radius-sm);
   font-size: 0.85rem;
   line-height: 1.5;
 
   &.nf-item-erro {
-    background-color: #fff5f5;
-    border-left: 3px solid #dc3545;
+    background-color: rgba(220, 79, 66, 0.06);
+    border-left: 3px solid var(--tm-danger);
   }
 
   &.nf-item-alerta {
-    background-color: #fffbeb;
-    border-left: 3px solid #f59e0b;
+    background-color: rgba(212, 162, 61, 0.06);
+    border-left: 3px solid var(--tm-warning);
   }
 }
 
@@ -113,15 +105,14 @@
   font-weight: 700;
   font-size: 0.78rem;
   font-family: monospace;
-  color: #374151;
+  color: var(--tm-foreground);
   min-width: 38px;
 }
 
 .nf-evento-descricao {
-  color: #374151;
+  color: var(--tm-foreground);
 }
 
-// Inputs compactos para pago/data/valor
 .nf-input-pago {
   font-size: 0.8rem;
   min-width: 110px;
@@ -130,9 +121,9 @@
   padding-inline: 4px;
 
   &:focus {
-    border-color: #86b7fe;
-    background-color: #fff;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: var(--tm-ring);
+    background-color: var(--tm-card);
+    box-shadow: 0 0 0 3px rgba(82, 96, 232, 0.12);
   }
 
   &:disabled {
@@ -143,7 +134,6 @@
   }
 }
 
-// Botao de salvar por linha
 .nf-save-btn {
   font-size: 0.78rem;
   padding: 2px 8px;
@@ -158,14 +148,21 @@
   }
 }
 
-// Estado de sucesso brevemente exibido apos salvar
 .nf-saved {
   color: #fff;
-  background-color: #198754;
-  border-color: #198754;
+  background-color: var(--tm-success);
+  border-color: var(--tm-success);
 
   &:hover {
-    background-color: #157347;
-    border-color: #146c43;
+    filter: brightness(0.92);
   }
+}
+
+.nf-reenviar-btn {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
 }

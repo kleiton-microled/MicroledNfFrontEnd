@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 type NfseNavigationItem = {
   label: string;
   route: string;
+  icon: string;
   exact?: boolean;
 };
 
@@ -15,12 +16,18 @@ type NfseNavigationItem = {
   styleUrl: './nfse-sidebar.scss',
 })
 export class NfseSidebarComponent {
+  protected readonly collapsed = signal(false);
+
   protected readonly navigationItems: NfseNavigationItem[] = [
-    { label: 'Dashboard', route: '/nfse/dashboard' },
-    { label: 'Consulta NFSe', route: '/nfse/consulta-nfse' },
-    { label: 'Emissao NFSe', route: '/nfse/emissao-nfse' },
-    { label: 'Cancelamento NFSe', route: '/nfse/cancelamento-nfse' },
-    { label: 'Configuracoes NFSe', route: '/nfse/configuracoes-nfse' },
-    { label: 'Lista de NFs', route: '/nfse/lista-notas-fiscais' },
+    { label: 'Dashboard', route: '/nfse/dashboard', icon: 'bi-speedometer2' },
+    { label: 'Lista de NFs', route: '/nfse/lista-notas-fiscais', icon: 'bi-receipt' },
+    { label: 'Emissao NFSe', route: '/nfse/emissao-nfse', icon: 'bi-file-earmark-plus' },
+    { label: 'Consulta NFSe', route: '/nfse/consulta-nfse', icon: 'bi-search' },
+    { label: 'Cancelamento NFSe', route: '/nfse/cancelamento-nfse', icon: 'bi-x-circle' },
+    { label: 'Configuracoes', route: '/nfse/configuracoes-nfse', icon: 'bi-gear' },
   ];
+
+  protected toggleCollapse(): void {
+    this.collapsed.update(v => !v);
+  }
 }

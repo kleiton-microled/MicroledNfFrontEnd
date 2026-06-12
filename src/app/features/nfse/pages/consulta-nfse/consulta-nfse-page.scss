@@ -3,7 +3,7 @@
 }
 
 .empty-state {
-  border: 1px dashed #ced4da;
-  border-radius: 1rem;
-  background-color: #f8f9fa;
+  border: 1px dashed var(--tm-border);
+  border-radius: var(--tm-radius-xl);
+  background-color: var(--tm-muted);
 }

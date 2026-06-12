@@ -4,13 +4,13 @@
 
 .summary-item {
   padding: 1rem;
-  border: 1px solid #e9ecef;
-  border-radius: 1rem;
-  background-color: #fff;
+  border: 1px solid var(--tm-border);
+  border-radius: var(--tm-radius-xl);
+  background-color: var(--tm-card);
 }
 
 .empty-state {
-  border: 1px dashed #ced4da;
-  border-radius: 1rem;
-  background-color: #f8f9fa;
+  border: 1px dashed var(--tm-border);
+  border-radius: var(--tm-radius-xl);
+  background-color: var(--tm-muted);
 }

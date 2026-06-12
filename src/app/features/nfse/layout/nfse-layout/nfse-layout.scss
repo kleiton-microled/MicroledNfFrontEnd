@@ -2,9 +2,18 @@
   display: block;
 }
 
-.content-panel {
-  min-height: calc(100dvh - 4rem);
-  background:
-    linear-gradient(180deg, rgba(13, 110, 253, 0.03), transparent 180px),
-    #fff;
+.nfe-app-shell {
+  min-height: 100vh;
+  background: var(--tm-background);
+}
+
+.nfe-app-main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 1.5rem;
+
+  @media (min-width: 992px) {
+    padding: 2rem;
+  }
 }
