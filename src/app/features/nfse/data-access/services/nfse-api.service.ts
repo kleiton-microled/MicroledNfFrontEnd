@@ -217,6 +217,14 @@ export class NfseApiService {
       .pipe(catchError((error) => this.handleError('download do PDF da nota fiscal', error)));
   }
 
+  gerarPdfNotaFiscal(id: string): Observable<Blob> {
+    return this.http
+      .post(`${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}/pdf/generate`, null, {
+        responseType: 'blob',
+      })
+      .pipe(catchError((error) => this.handleError('geracao do PDF da nota fiscal', error)));
+  }
+
   atualizarPagamento(
     id: string,
     body: { pago: boolean; dataPagamento?: string; valorDepositado?: number; alteradoPor?: string },
