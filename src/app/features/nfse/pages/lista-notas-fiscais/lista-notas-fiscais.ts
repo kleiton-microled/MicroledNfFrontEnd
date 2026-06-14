@@ -32,8 +32,6 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly savingId = signal<string | null>(null);
   protected readonly savedId = signal<string | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
-  protected readonly baixandoPdfId = signal<string | null>(null);
-  protected readonly gerandoPdfId = signal<string | null>(null);
   protected readonly rowDrafts = new Map<string, RowDraft>();
 
   ngOnInit(): void {
@@ -201,55 +199,16 @@ export class ListaNotasFiscaisComponent implements OnInit {
       });
   }
 
-  protected downloadPdf(item: NotaFiscalItemResponse): void {
-    if (this.baixandoPdfId() === item.id) return;
-    this.baixandoPdfId.set(item.id);
-
-    this.nfseApiService
-      .downloadPdfNotaFiscal(item.id)
-      .pipe(finalize(() => this.baixandoPdfId.set(null)))
-      .subscribe({
-        next: (blob: Blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `nota-fiscal-${item.numeroNota ?? item.id}.pdf`;
-          a.click();
-          URL.revokeObjectURL(url);
-        },
-        error: (error: unknown) => {
-          const message = error instanceof NfseApiError
-            ? error.message
-            : 'Nao foi possivel baixar o PDF.';
-          alert(message);
-        },
-      });
-  }
-
-  protected gerarPdf(item: NotaFiscalItemResponse): void {
-    if (this.gerandoPdfId() === item.id) return;
-    this.gerandoPdfId.set(item.id);
-
-    this.nfseApiService
-      .gerarPdfNotaFiscal(item.id)
-      .pipe(finalize(() => this.gerandoPdfId.set(null)))
-      .subscribe({
-        next: (blob: Blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `nota-fiscal-${item.numeroNota ?? item.id}.pdf`;
-          a.click();
-          URL.revokeObjectURL(url);
-          this.facade.loadPage();
-        },
-        error: (error: unknown) => {
-          const message = error instanceof NfseApiError
-            ? error.message
-            : 'Nao foi possivel gerar o PDF.';
-          alert(message);
-        },
-      });
+  protected abrirPdfPrefeitura(item: NotaFiscalItemResponse): void {
+    const inscricao = item.inscricaoPrestador;
+    const nf = item.numeroNota;
+    if (!inscricao || !nf) return;
+    const returnUrl = encodeURIComponent(`consultas.aspx?inscricao=${inscricao}`);
+    window.open(
+      `https://nfe.prefeitura.sp.gov.br/contribuinte/notaprint.aspx?inscricao=${inscricao}&nf=${nf}&returnUrl=${returnUrl}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
   }
 
   protected reenviarNota(item: NotaFiscalItemResponse): void {
