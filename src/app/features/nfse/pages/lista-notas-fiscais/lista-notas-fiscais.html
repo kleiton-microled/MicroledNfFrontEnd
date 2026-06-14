@@ -38,8 +38,6 @@
                 <th scope="col">Status</th>
                 <th scope="col">Data Emissao</th>
                 <th scope="col">Data Criacao</th>
-                <th scope="col">PDF</th>
-                <th scope="col">XML</th>
                 <th scope="col">Pago</th>
                 <th scope="col">Data Pagamento</th>
                 <th scope="col">Valor Depositado</th>
@@ -51,7 +49,12 @@
               @for (item of facade.items(); track item.id) {
                 <tr [class.nf-row-expanded]="isExpanded(item.id)">
                   <td class="px-4 fw-semibold">{{ item.numeroNota ?? '-' }}</td>
-                  <td>{{ item.cpfCnpjTomador ?? '-' }}</td>
+                  <td>
+                    <div>{{ item.cpfCnpjTomador ?? '-' }}</div>
+                    @if (item.nomeTomador) {
+                      <div class="text-secondary" style="font-size: 0.75rem; line-height: 1.2; margin-top: 2px;">{{ item.nomeTomador }}</div>
+                    }
+                  </td>
                   <td>
                     @if (hasEventos(item)) {
                       <button
@@ -82,20 +85,6 @@
                   </td>
                   <td>{{ (item.dataEmissao | date: 'dd/MM/yyyy') ?? '-' }}</td>
                   <td>{{ item.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>
-                    @if (item.hasPdf) {
-                      <span class="badge text-bg-success">Sim</span>
-                    } @else {
-                      <span class="badge text-bg-secondary">Nao</span>
-                    }
-                  </td>
-                  <td>
-                    @if (item.hasXml) {
-                      <span class="badge text-bg-success">Sim</span>
-                    } @else {
-                      <span class="badge text-bg-secondary">Nao</span>
-                    }
-                  </td>
                   <td class="text-center">
                     <input
                       type="checkbox"
@@ -197,7 +186,7 @@
 
                 @if (hasEventos(item) && isExpanded(item.id)) {
                   <tr class="nf-accordion-row">
-                    <td colspan="12" class="p-0">
+                    <td colspan="10" class="p-0">
                       <div class="nf-accordion-body">
 
                         @if ((item.erros?.length ?? 0) > 0) {

@@ -555,6 +555,7 @@ export interface NotaFiscalItemResponse {
   inscricaoPrestador?: string;
   cnpjPrestador?: string;
   cpfCnpjTomador?: string;
+  nomeTomador?: string;
   status: string;
   dataEmissao?: string;
   dataCancelamento?: string;
