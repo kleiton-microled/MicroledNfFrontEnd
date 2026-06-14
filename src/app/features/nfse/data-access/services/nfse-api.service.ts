@@ -237,6 +237,12 @@ export class NfseApiService {
       .pipe(catchError((error) => this.handleError('atualizacao de pagamento', error)));
   }
 
+  excluirNotaFiscal(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}`)
+      .pipe(catchError((error) => this.handleError('exclusao da nota fiscal', error)));
+  }
+
   searchNotasFiscais(filter: NotaFiscalFilter): Observable<PagedNotaFiscalResponse> {
     return this.http
       .get<ApiEnvelopeResponse<PagedNotaFiscalResponse>>(this.notasFiscaisApiUrl, {

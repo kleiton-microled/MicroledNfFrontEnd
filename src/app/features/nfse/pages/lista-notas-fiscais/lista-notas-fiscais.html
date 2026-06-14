@@ -145,6 +145,20 @@
                         </svg>
                         Reenviar
                       </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        [disabled]="deletingId() === item.id"
+                        (click)="excluirNota(item)"
+                        title="Excluir nota fiscal"
+                      >
+                        @if (deletingId() === item.id) {
+                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        } @else {
+                          <i class="bi bi-trash"></i>
+                        }
+                        Excluir
+                      </button>
                     }
                     @if (item.numeroNota && item.inscricaoPrestador) {
                       <button

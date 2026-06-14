@@ -32,6 +32,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly savingId = signal<string | null>(null);
   protected readonly savedId = signal<string | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
+  protected readonly deletingId = signal<string | null>(null);
   protected readonly rowDrafts = new Map<string, RowDraft>();
 
   ngOnInit(): void {
@@ -209,6 +210,24 @@ export class ListaNotasFiscaisComponent implements OnInit {
       '_blank',
       'noopener,noreferrer',
     );
+  }
+
+  protected excluirNota(item: NotaFiscalItemResponse): void {
+    if (this.deletingId() === item.id) return;
+    if (!confirm(`Excluir a nota ${item.numeroRps ?? item.id}? Esta ação não pode ser desfeita.`)) return;
+    this.deletingId.set(item.id);
+    this.nfseApiService
+      .excluirNotaFiscal(item.id)
+      .pipe(finalize(() => this.deletingId.set(null)))
+      .subscribe({
+        next: () => this.facade.loadPage(),
+        error: (error: unknown) => {
+          const message = error instanceof NfseApiError
+            ? error.message
+            : 'Não foi possível excluir a nota fiscal.';
+          alert(message);
+        },
+      });
   }
 
   protected reenviarNota(item: NotaFiscalItemResponse): void {
