@@ -727,17 +727,6 @@
             }
             Enviar nota
           </button>
-          <!-- <button
-            type="button"
-            class="btn btn-outline-primary"
-            [disabled]="facade.isCheckingStatus()"
-            (click)="consultarStatus()"
-          >
-            @if (facade.isCheckingStatus()) {
-              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-            }
-            Consultar status
-          </button> -->
           <button
             type="button"
             class="btn btn-outline-info"
@@ -778,34 +767,6 @@
       {{ facade.processErrorMessage() }}
     </div>
   }
-
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-      <div class="row g-3 align-items-end">
-        <div class="col-12 col-md-9">
-          <label class="form-label" for="numeroProtocolo">Protocolo para consulta de status</label>
-          <input
-            id="numeroProtocolo"
-            class="form-control"
-            type="text"
-            [value]="facade.protocol()"
-            (input)="updateProtocol($event)"
-            placeholder="Informe ou gere um protocolo"
-          />
-        </div>
-        <div class="col-12 col-md-3">
-          <button
-            type="button"
-            class="btn btn-outline-primary w-100"
-            [disabled]="facade.isCheckingStatus()"
-            (click)="consultarStatus()"
-          >
-            Consultar status
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   @if (facade.result(); as result) {
     <div class="card border-0 shadow-sm">
@@ -983,86 +944,4 @@
     </div>
   }
 
-  @if (facade.statusErrorMessage()) {
-    <div class="alert alert-warning mb-0">
-      {{ facade.statusErrorMessage() }}
-    </div>
-  }
-
-  @if (facade.statusResult(); as statusResult) {
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-4 p-xl-5">
-        <div class="d-flex flex-column gap-4">
-          <div>
-            <h2 class="h4 mb-2">Status do protocolo</h2>
-            <p class="text-secondary mb-0">
-              Situacao atual: <strong>{{ statusResult.situacaoNome || 'Nao informada' }}</strong>
-            </p>
-          </div>
-
-          @if (statusResult.erros.length > 0) {
-            <div class="alert alert-danger mb-0">
-              <div class="fw-semibold mb-2">Erros</div>
-              <ul class="mb-0 ps-3">
-                @for (error of statusResult.erros; track error) {
-                  <li>{{ error }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Sucesso</div>
-                <div>{{ statusResult.sucesso ? 'Sim' : 'Nao' }}</div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Situacao codigo</div>
-                <div>{{ statusResult.situacaoCodigo ?? 'Nao informado' }}</div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Protocolo</div>
-                <div>{{ facade.protocol() || 'Nao informado' }}</div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Numero lote</div>
-                <div>{{ statusResult.numeroLote ?? 'Nao informado' }}</div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Data recebimento</div>
-                <div>{{ statusResult.dataRecebimento || 'Nao informada' }}</div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-              <div class="result-item">
-                <div class="small text-secondary">Data processamento</div>
-                <div>{{ statusResult.dataProcessamento || 'Nao informada' }}</div>
-              </div>
-            </div>
-          </div>
-
-          @if (statusResult.resultadoOperacao) {
-            <div class="result-item">
-              <div class="small text-secondary mb-2">Resultado da operacao</div>
-              <pre class="mb-0 text-break text-wrap">{{ statusResult.resultadoOperacao }}</pre>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  }
 </section>

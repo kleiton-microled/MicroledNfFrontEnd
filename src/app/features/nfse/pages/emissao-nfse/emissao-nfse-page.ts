@@ -119,6 +119,9 @@ export class EmissaoNfsePageComponent implements OnInit {
   ngOnInit(): void {
     this.applyReenvioStateIfPresent();
     this.facade.loadCurrentCertificate();
+    this.facade.loadProximoNumeroRps((numero) => {
+      this.form.controls.numeroRps.patchValue(String(numero), { emitEvent: false });
+    });
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
       this.form.get(name)?.disable({ emitEvent: false });
@@ -268,15 +271,6 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.processRps(mapFormToProcessarRpsRequest(this.form.getRawValue()));
   }
 
-  protected consultarStatus(): void {
-    this.facade.consultarStatus();
-  }
-
-  protected updateProtocol(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.facade.setProtocol(input.value);
-  }
-
   protected resetForm(): void {
     const defaultValue = getDefaultEmissaoRpsTesteFormValue();
     const currentCertificate = this.facade.currentCertificate();
@@ -300,6 +294,10 @@ export class EmissaoNfsePageComponent implements OnInit {
     for (const name of IBS_NAO_ENVIADO_FORM_KEYS) {
       this.form.get(name)?.disable({ emitEvent: false });
     }
+
+    this.facade.loadProximoNumeroRps((numero) => {
+      this.form.controls.numeroRps.patchValue(String(numero), { emitEvent: false });
+    });
   }
 
   protected importPendingRps(): void {

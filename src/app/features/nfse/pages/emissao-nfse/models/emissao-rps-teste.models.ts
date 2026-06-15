@@ -86,7 +86,7 @@ export interface EmissaoRpsTesteFormValue {
   ibsImovelCObra: string;
 }
 
-/** Estado inicial: vazio exceto flags; prestador vem do certificado via `applyCertificateToEmissaoRpsTesteFormValue`. */
+/** Estado inicial: campos padrão pré-preenchidos; prestador vem do certificado via `applyCertificateToEmissaoRpsTesteFormValue`. */
 export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
   return {
     prestadorCpfCnpj: '',
@@ -105,17 +105,17 @@ export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
     dataFim: '',
     transacao: true,
     inscricaoPrestador: '',
-    serieRps: '',
+    serieRps: 'A',
     numeroRps: '',
-    tipoRps: '',
-    dataEmissao: '',
-    statusRps: '',
-    tributacaoRps: '',
+    tipoRps: 'RPS',
+    dataEmissao: formatDateIso(startOfLocalToday()),
+    statusRps: 'N',
+    tributacaoRps: 'T',
     codigoServico: '',
     discriminacao: '',
     valorServicos: '',
     valorDeducoes: '',
-    aliquotaServicos: '',
+    aliquotaServicos: '0.029',
     issRetido: false,
     tomadorCpfCnpj: '',
     tomadorInscricaoMunicipal: '',
@@ -154,7 +154,7 @@ export function getDefaultEmissaoRpsTesteFormValue(): EmissaoRpsTesteFormValue {
     ibsTpOper: '',
     ibsRefNfSe: '',
     ibsTpEnteGov: '',
-    ibsIndDest: '',
+    ibsIndDest: '1',
     ibsDestNif: '',
     ibsDestNaoNif: '',
     ibsCClassTrib: '000001',
@@ -619,9 +619,16 @@ function parseDataEmissaoLocalDate(value: string): Date | null {
   return new Date(y, m - 1, d);
 }
 
-function startOfLocalToday(): Date {
+export function startOfLocalToday(): Date {
   const n = new Date();
   return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+
+function formatDateIso(date: Date): string {
+  const yyyy = String(date.getFullYear());
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function addCalendarDays(date: Date, days: number): Date {

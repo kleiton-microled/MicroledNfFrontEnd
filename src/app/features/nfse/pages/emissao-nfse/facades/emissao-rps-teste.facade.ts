@@ -44,6 +44,7 @@ export class EmissaoRpsTesteFacade {
   private readonly _calculateTaxesErrorMessage = signal<string | null>(null);
   private readonly _taxesCalculatedSuccessfully = signal(false);
   private readonly _memoriaCalculo = signal<readonly string[]>([]);
+  private readonly _proximoNumeroRps = signal<number | null>(null);
 
   readonly isLoading = this._isLoading.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
@@ -64,6 +65,7 @@ export class EmissaoRpsTesteFacade {
   readonly calculateTaxesErrorMessage = this._calculateTaxesErrorMessage.asReadonly();
   readonly taxesCalculatedSuccessfully = this._taxesCalculatedSuccessfully.asReadonly();
   readonly memoriaCalculo = this._memoriaCalculo.asReadonly();
+  readonly proximoNumeroRps = this._proximoNumeroRps.asReadonly();
 
   loadCurrentCertificate(): void {
     this._loadingCurrentCertificate.set(true);
@@ -88,6 +90,24 @@ export class EmissaoRpsTesteFacade {
         error: (error: unknown) => {
           this._currentCertificate.set(null);
           this._currentCertificateMessage.set(this.getCurrentCertificateMessage(error));
+        },
+      });
+  }
+
+  loadProximoNumeroRps(onResolved: (numero: number) => void): void {
+    this.nfseApiService
+      .searchNotasFiscais({ page: 1, pageSize: 1 })
+      .subscribe({
+        next: (response) => {
+          const ultima = response.items[0];
+          const numeroAtual = ultima?.numeroRps ? Number(ultima.numeroRps) : 0;
+          const proximo = Number.isFinite(numeroAtual) && numeroAtual > 0 ? numeroAtual + 1 : 1;
+          this._proximoNumeroRps.set(proximo);
+          onResolved(proximo);
+        },
+        error: () => {
+          this._proximoNumeroRps.set(1);
+          onResolved(1);
         },
       });
   }
