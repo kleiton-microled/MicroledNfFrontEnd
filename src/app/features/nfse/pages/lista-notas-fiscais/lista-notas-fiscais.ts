@@ -6,8 +6,9 @@ import { finalize } from 'rxjs';
 
 import { ListaNotasFiscaisFacade } from './facades/lista-notas-fiscais.facade';
 import { NfseApiService } from '../../data-access/services/nfse-api.service';
-import { NfseApiError, NotaFiscalItemResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
+import { NfseApiError, NotaFiscalItemResponse, NotaFiscalResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
 import { ReenvioNotaState } from './models/reenvio-nota-state';
+import { DuplicarNotaState } from './models/duplicar-nota-state';
 
 interface ModalDraft {
   pago: boolean;
@@ -33,6 +34,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
   protected readonly expandedId = signal<string | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
+  protected readonly duplicandoId = signal<string | null>(null);
   protected readonly editingItem = signal<NotaFiscalItemResponse | null>(null);
   protected readonly modalSaving = signal(false);
   protected modalDraft: ModalDraft = { pago: false, dataPagamento: '', valorDepositado: null };
@@ -230,5 +232,68 @@ export class ListaNotasFiscaisComponent implements OnInit {
     };
 
     void this.router.navigate(['/nfse/emissao-nfse'], { state: { reenvio: state } });
+  }
+
+  protected duplicarNota(item: NotaFiscalItemResponse): void {
+    if (this.duplicandoId() === item.id) return;
+
+    this.duplicandoId.set(item.id);
+
+    this.nfseApiService
+      .obterNotaFiscalPorId(item.id)
+      .pipe(finalize(() => this.duplicandoId.set(null)))
+      .subscribe({
+        next: (response: NotaFiscalResponse) => {
+          const state: DuplicarNotaState = {
+            serieRps: response.serieRps,
+            tipoRps: response.tipoRps,
+            statusRps: response.statusRps,
+            tributacaoRps: response.tributacaoRps,
+            discriminacao: response.discriminacao,
+            codigoMunicipio: response.codigoMunicipio,
+            exigibilidadeISS: response.exigibilidadeISS,
+            municipioIncidencia: response.municipioIncidencia,
+            tomadorCpfCnpj: response.cpfCnpjTomador,
+            tomadorRazaoSocial: response.nomeTomador,
+            tomadorEmail: response.tomadorEmail,
+            tomadorInscricaoMunicipal: response.tomadorInscricaoMunicipal,
+            tomadorCep: response.tomadorCep,
+            tomadorLogradouro: response.tomadorLogradouro,
+            tomadorNumero: response.tomadorNumero,
+            tomadorComplemento: response.tomadorComplemento,
+            tomadorBairro: response.tomadorBairro,
+            tomadorCodigoMunicipio: response.tomadorCodigoMunicipio,
+            tomadorUf: response.tomadorUf,
+            codigoServico: response.codigoServico,
+            valorServicos: response.valorServicos,
+            aliquotaServicos: response.aliquotaServicos,
+            issRetido: response.issRetido,
+            valorIss: response.valorIss,
+            valorDeducoes: response.valorDeducoes,
+            valorPis: response.valorPis,
+            valorCofins: response.valorCofins,
+            valorInss: response.valorInss,
+            valorIr: response.valorIr,
+            valorCsll: response.valorCsll,
+            outrasRetencoes: response.outrasRetencoes,
+            descontoCondicionado: response.descontoCondicionado,
+            descontoIncondicionado: response.descontoIncondicionado,
+            ibsIndDest: response.ibsIndDest,
+            ibsCstIbs: response.ibsCstIbs,
+            ibsAliqEstadual: response.ibsAliqEstadual,
+            ibsAliqMunicipal: response.ibsAliqMunicipal,
+            ibsCstCbs: response.ibsCstCbs,
+            ibsAliqCbs: response.ibsAliqCbs,
+          };
+
+          void this.router.navigate(['/nfse/emissao-nfse'], { state: { duplicar: state } });
+        },
+        error: (error: unknown) => {
+          const message = error instanceof NfseApiError
+            ? error.message
+            : 'Nao foi possivel carregar os dados da nota fiscal.';
+          alert(message);
+        },
+      });
   }
 }

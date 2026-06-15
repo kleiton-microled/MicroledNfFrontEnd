@@ -579,3 +579,42 @@ export interface PagedNotaFiscalResponse {
   totalCount: number;
   totalPages: number;
 }
+
+export interface NotaFiscalResponse extends NotaFiscalItemResponse {
+  tipoRps?: string;
+  statusRps?: string;
+  tributacaoRps?: string;
+  discriminacao?: string;
+  codigoMunicipio?: string;
+  exigibilidadeISS?: string;
+  municipioIncidencia?: string;
+  tomadorEmail?: string;
+  tomadorInscricaoMunicipal?: string;
+  tomadorCep?: string;
+  tomadorLogradouro?: string;
+  tomadorNumero?: string;
+  tomadorComplemento?: string;
+  tomadorBairro?: string;
+  tomadorCodigoMunicipio?: string;
+  tomadorUf?: string;
+  codigoServico?: string;
+  valorServicos?: string;
+  aliquotaServicos?: string;
+  issRetido?: string;
+  valorIss?: string;
+  valorDeducoes?: string;
+  valorPis?: string;
+  valorCofins?: string;
+  valorInss?: string;
+  valorIr?: string;
+  valorCsll?: string;
+  outrasRetencoes?: string;
+  descontoCondicionado?: string;
+  descontoIncondicionado?: string;
+  ibsIndDest?: string;
+  ibsCstIbs?: string;
+  ibsAliqEstadual?: string;
+  ibsAliqMunicipal?: string;
+  ibsCstCbs?: string;
+  ibsAliqCbs?: string;
+}

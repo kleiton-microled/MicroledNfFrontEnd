@@ -33,6 +33,7 @@ import {
   mapFormToProcessarRpsRequest,
 } from './models/emissao-rps-teste.models';
 import { ReenvioNotaState } from '../lista-notas-fiscais/models/reenvio-nota-state';
+import { DuplicarNotaState } from '../lista-notas-fiscais/models/duplicar-nota-state';
 
 const TRIBUTOS_APENAS_API_FORM_KEYS = [
   'tributosBaseCalculoIss',
@@ -122,6 +123,7 @@ export class EmissaoNfsePageComponent implements OnInit {
     this.facade.loadProximoNumeroRps((numero) => {
       this.form.controls.numeroRps.patchValue(String(numero), { emitEvent: false });
     });
+    this.applyDuplicarStateIfPresent();
 
     for (const name of TRIBUTOS_APENAS_API_FORM_KEYS) {
       this.form.get(name)?.disable({ emitEvent: false });
@@ -364,6 +366,79 @@ export class EmissaoNfsePageComponent implements OnInit {
     if (state.dataEmissao) {
       patch.dataEmissao = state.dataEmissao;
     }
+
+    if (Object.keys(patch).length > 0) {
+      this.form.patchValue(patch, { emitEvent: false });
+    }
+  }
+
+  private applyDuplicarStateIfPresent(): void {
+    const navState = this.router.getCurrentNavigation()?.extras.state;
+    const source = (navState ?? history.state) as Record<string, unknown>;
+    const duplicar = source?.['duplicar'];
+
+    if (!duplicar || typeof duplicar !== 'object') {
+      return;
+    }
+
+    const state = duplicar as DuplicarNotaState;
+    const patch: Partial<{
+      serieRps: string;
+      tipoRps: string;
+      statusRps: string;
+      tributacaoRps: string;
+      discriminacao: string;
+      tomadorCpfCnpj: string;
+      tomadorRazaoSocial: string;
+      tomadorEmail: string;
+      tomadorInscricaoMunicipal: string;
+      enderecoCep: string;
+      enderecoLogradouro: string;
+      enderecoNumero: string;
+      enderecoComplemento: string;
+      enderecoBairro: string;
+      enderecoCodigoMunicipio: string;
+      enderecoUf: string;
+      codigoServico: string;
+      valorServicos: string;
+      aliquotaServicos: string;
+      issRetido: boolean;
+      valorDeducoes: string;
+      tributosValorPIS: string;
+      tributosValorCOFINS: string;
+      tributosValorINSS: string;
+      tributosValorIR: string;
+      tributosValorCSLL: string;
+      ibsIndDest: string;
+    }> = {};
+
+    if (state.serieRps) patch.serieRps = state.serieRps;
+    if (state.tipoRps) patch.tipoRps = state.tipoRps;
+    if (state.statusRps) patch.statusRps = state.statusRps;
+    if (state.tributacaoRps) patch.tributacaoRps = state.tributacaoRps;
+    if (state.discriminacao) patch.discriminacao = state.discriminacao;
+    if (state.tomadorCpfCnpj) patch.tomadorCpfCnpj = state.tomadorCpfCnpj;
+    if (state.tomadorRazaoSocial) patch.tomadorRazaoSocial = state.tomadorRazaoSocial;
+    if (state.tomadorEmail) patch.tomadorEmail = state.tomadorEmail;
+    if (state.tomadorInscricaoMunicipal) patch.tomadorInscricaoMunicipal = state.tomadorInscricaoMunicipal;
+    if (state.tomadorCep) patch.enderecoCep = state.tomadorCep;
+    if (state.tomadorLogradouro) patch.enderecoLogradouro = state.tomadorLogradouro;
+    if (state.tomadorNumero) patch.enderecoNumero = state.tomadorNumero;
+    if (state.tomadorComplemento != null) patch.enderecoComplemento = state.tomadorComplemento;
+    if (state.tomadorBairro) patch.enderecoBairro = state.tomadorBairro;
+    if (state.tomadorCodigoMunicipio) patch.enderecoCodigoMunicipio = state.tomadorCodigoMunicipio;
+    if (state.tomadorUf) patch.enderecoUf = state.tomadorUf;
+    if (state.codigoServico) patch.codigoServico = state.codigoServico;
+    if (state.valorServicos) patch.valorServicos = state.valorServicos;
+    if (state.aliquotaServicos) patch.aliquotaServicos = state.aliquotaServicos;
+    if (state.issRetido != null) patch.issRetido = state.issRetido === '1' || state.issRetido === 'true';
+    if (state.valorDeducoes) patch.valorDeducoes = state.valorDeducoes;
+    if (state.valorPis) patch.tributosValorPIS = state.valorPis;
+    if (state.valorCofins) patch.tributosValorCOFINS = state.valorCofins;
+    if (state.valorInss) patch.tributosValorINSS = state.valorInss;
+    if (state.valorIr) patch.tributosValorIR = state.valorIr;
+    if (state.valorCsll) patch.tributosValorCSLL = state.valorCsll;
+    if (state.ibsIndDest) patch.ibsIndDest = state.ibsIndDest;
 
     if (Object.keys(patch).length > 0) {
       this.form.patchValue(patch, { emitEvent: false });

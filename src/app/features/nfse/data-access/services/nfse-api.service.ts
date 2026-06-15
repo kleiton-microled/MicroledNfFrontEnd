@@ -31,6 +31,7 @@ import {
   NfseSpCalculateTaxesResponse,
   NotaFiscalFilter,
   NotaFiscalItemResponse,
+  NotaFiscalResponse,
   OperacaoNfseResponse,
   PagedNotaFiscalResponse,
   PendingRpsResponse,
@@ -241,6 +242,24 @@ export class NfseApiService {
     return this.http
       .delete<void>(`${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}`)
       .pipe(catchError((error) => this.handleError('exclusao da nota fiscal', error)));
+  }
+
+  obterNotaFiscalPorId(id: string): Observable<NotaFiscalResponse> {
+    return this.http
+      .get<ApiEnvelopeResponse<NotaFiscalResponse>>(`${this.notasFiscaisApiUrl}/${encodeURIComponent(id)}`)
+      .pipe(
+        map((envelope) => {
+          if (!envelope.success || !envelope.data) {
+            throw new NfseApiError(
+              envelope.message?.trim() || 'Nao foi possivel carregar a nota fiscal.',
+              200,
+            );
+          }
+
+          return envelope.data;
+        }),
+        catchError((error) => this.handleError('consulta da nota fiscal por id', error)),
+      );
   }
 
   searchNotasFiscais(filter: NotaFiscalFilter): Observable<PagedNotaFiscalResponse> {
