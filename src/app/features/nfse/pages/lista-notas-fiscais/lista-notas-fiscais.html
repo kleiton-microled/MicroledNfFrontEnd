@@ -251,62 +251,85 @@
 
 <dialog #editDialog class="nf-edit-dialog" (cancel)="closeModal()">
   @if (editingItem(); as item) {
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          Editar Pagamento — NF {{ item.numeroNota ?? item.id }}
-        </h5>
-        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar"></button>
+    <div class="nf-edit-card">
+
+      <div class="nf-edit-header">
+        <div class="nf-edit-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+          </svg>
+        </div>
+        <div class="nf-edit-header-text">
+          <h5 class="nf-edit-title">Editar Pagamento</h5>
+          <p class="nf-edit-subtitle">NF {{ item.numeroNota ?? item.id }}</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" (click)="closeModal()" aria-label="Fechar"></button>
       </div>
-      <div class="modal-body d-flex flex-column gap-3">
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="modal-pago"
-            class="form-check-input"
-            [ngModel]="modalDraft.pago"
-            (ngModelChange)="onModalPagoChange($event)"
-          />
-          <label class="form-check-label" for="modal-pago">Pago</label>
+
+      <div class="nf-edit-body">
+
+        <div class="nf-pago-toggle" [class.nf-pago-toggle--active]="modalDraft.pago">
+          <div>
+            <div class="nf-pago-toggle-label">Pago</div>
+            <div class="nf-pago-toggle-desc">Marque se o pagamento foi recebido</div>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input
+              type="checkbox"
+              id="modal-pago"
+              class="form-check-input"
+              role="switch"
+              [ngModel]="modalDraft.pago"
+              (ngModelChange)="onModalPagoChange($event)"
+            />
+          </div>
         </div>
-        <div>
-          <label class="form-label" for="modal-data-pagamento">Data de Pagamento</label>
-          <input
-            type="date"
-            id="modal-data-pagamento"
-            class="form-control"
-            [(ngModel)]="modalDraft.dataPagamento"
-            [disabled]="!modalDraft.pago"
-          />
+
+        <div class="nf-edit-fields" [class.nf-edit-fields--disabled]="!modalDraft.pago">
+          <div class="nf-edit-field-group">
+            <label class="form-label" for="modal-data-pagamento">Data de Pagamento</label>
+            <input
+              type="date"
+              id="modal-data-pagamento"
+              class="form-control"
+              [(ngModel)]="modalDraft.dataPagamento"
+              [disabled]="!modalDraft.pago"
+            />
+          </div>
+          <div class="nf-edit-field-group">
+            <label class="form-label" for="modal-valor-depositado">Valor Depositado (R$)</label>
+            <input
+              type="number"
+              id="modal-valor-depositado"
+              step="0.01"
+              min="0"
+              class="form-control"
+              [(ngModel)]="modalDraft.valorDepositado"
+              [disabled]="!modalDraft.pago"
+              placeholder="0,00"
+            />
+          </div>
         </div>
-        <div>
-          <label class="form-label" for="modal-valor-depositado">Valor Depositado</label>
-          <input
-            type="number"
-            id="modal-valor-depositado"
-            step="0.01"
-            min="0"
-            class="form-control"
-            [(ngModel)]="modalDraft.valorDepositado"
-            [disabled]="!modalDraft.pago"
-            placeholder="0,00"
-          />
-        </div>
+
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+
+      <div class="nf-edit-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
         <button
           type="button"
-          class="btn btn-primary"
+          class="btn btn-primary d-inline-flex align-items-center gap-2"
           [disabled]="modalSaving()"
           (click)="saveModal()"
         >
           @if (modalSaving()) {
-            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           }
-          Salvar
+          Salvar pagamento
         </button>
       </div>
+
     </div>
   }
 </dialog>
