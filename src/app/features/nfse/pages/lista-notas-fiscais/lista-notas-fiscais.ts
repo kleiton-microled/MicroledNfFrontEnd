@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { NfseApiService } from '../../data-access/services/nfse-api.service';
 import { NfseApiError, NotaFiscalItemResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
 import { ReenvioNotaState } from './models/reenvio-nota-state';
 
-interface RowDraft {
+interface ModalDraft {
   pago: boolean;
   dataPagamento: string;
   valorDepositado: number | null;
@@ -28,12 +28,14 @@ export class ListaNotasFiscaisComponent implements OnInit {
   private readonly nfseApiService = inject(NfseApiService);
   private readonly router = inject(Router);
 
+  @ViewChild('editDialog') private editDialog!: ElementRef<HTMLDialogElement>;
+
   protected readonly expandedId = signal<string | null>(null);
-  protected readonly savingId = signal<string | null>(null);
-  protected readonly savedId = signal<string | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
-  protected readonly rowDrafts = new Map<string, RowDraft>();
+  protected readonly editingItem = signal<NotaFiscalItemResponse | null>(null);
+  protected readonly modalSaving = signal(false);
+  protected modalDraft: ModalDraft = { pago: false, dataPagamento: '', valorDepositado: null };
 
   ngOnInit(): void {
     this.facade.loadPage();
@@ -55,71 +57,58 @@ export class ListaNotasFiscaisComponent implements OnInit {
     return this.expandedId() === id;
   }
 
-  protected getDraft(item: NotaFiscalItemResponse): RowDraft {
-    if (!this.rowDrafts.has(item.id)) {
-      this.rowDrafts.set(item.id, {
-        pago: item.pago ?? false,
-        dataPagamento: item.dataPagamento
-          ? new Date(item.dataPagamento).toISOString().substring(0, 10)
-          : '',
-        valorDepositado: item.valorDepositado ?? null,
-      });
-    }
-
-    return this.rowDrafts.get(item.id)!;
+  protected openEditModal(item: NotaFiscalItemResponse): void {
+    this.editingItem.set(item);
+    this.modalDraft = {
+      pago: item.pago ?? false,
+      dataPagamento: item.dataPagamento
+        ? new Date(item.dataPagamento).toISOString().substring(0, 10)
+        : '',
+      valorDepositado: item.valorDepositado ?? null,
+    };
+    this.editDialog.nativeElement.showModal();
   }
 
-  protected onFieldChange(id: string, field: keyof RowDraft, value: unknown): void {
-    const draft = this.rowDrafts.get(id);
-    if (!draft) {
-      return;
-    }
+  protected closeModal(): void {
+    this.editDialog.nativeElement.close();
+    this.editingItem.set(null);
+  }
 
-    (draft as unknown as Record<string, unknown>)[field] = value;
-
-    if (field === 'pago' && !value) {
-      draft.dataPagamento = '';
-      draft.valorDepositado = null;
+  protected onModalPagoChange(pago: boolean): void {
+    this.modalDraft.pago = pago;
+    if (!pago) {
+      this.modalDraft.dataPagamento = '';
+      this.modalDraft.valorDepositado = null;
     }
   }
 
-  protected saveRow(item: NotaFiscalItemResponse): void {
-    if (this.savingId() === item.id) {
-      return;
-    }
+  protected saveModal(): void {
+    const item = this.editingItem();
+    if (!item || this.modalSaving()) return;
 
-    const draft = this.rowDrafts.get(item.id);
-    if (!draft) {
-      return;
-    }
-
-    this.savingId.set(item.id);
+    this.modalSaving.set(true);
 
     const body: { pago: boolean; dataPagamento?: string; valorDepositado?: number; alteradoPor: string } = {
-      pago: draft.pago,
+      pago: this.modalDraft.pago,
       alteradoPor: 'frontend',
     };
 
-    if (draft.pago) {
-      if (draft.dataPagamento) {
-        body.dataPagamento = new Date(draft.dataPagamento).toISOString();
+    if (this.modalDraft.pago) {
+      if (this.modalDraft.dataPagamento) {
+        body.dataPagamento = new Date(this.modalDraft.dataPagamento).toISOString();
       }
-      if (draft.valorDepositado !== null && draft.valorDepositado !== undefined) {
-        body.valorDepositado = draft.valorDepositado;
+      if (this.modalDraft.valorDepositado !== null && this.modalDraft.valorDepositado !== undefined) {
+        body.valorDepositado = this.modalDraft.valorDepositado;
       }
     }
 
     this.nfseApiService
       .atualizarPagamento(item.id, body)
-      .pipe(finalize(() => this.savingId.set(null)))
+      .pipe(finalize(() => this.modalSaving.set(false)))
       .subscribe({
         next: () => {
-          this.savedId.set(item.id);
-          setTimeout(() => {
-            if (this.savedId() === item.id) {
-              this.savedId.set(null);
-            }
-          }, 2000);
+          this.closeModal();
+          this.facade.loadPage();
         },
         error: (error: unknown) => {
           const message = error instanceof NfseApiError
