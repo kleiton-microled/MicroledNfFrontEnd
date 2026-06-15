@@ -188,6 +188,69 @@
     </div>
   </div>
 
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4 d-flex flex-column gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div
+              class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10"
+              style="width: 48px; height: 48px; flex-shrink: 0"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                class="text-primary"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+                />
+                <path
+                  d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <h2 class="h4 mb-1">Agente Local</h2>
+              <p class="text-secondary mb-0" style="font-size: 0.875rem">
+                Baixe o agente local para integração com seu certificado digital.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-auto">
+            <button
+              type="button"
+              class="btn btn-primary d-inline-flex align-items-center gap-2"
+              (click)="downloadAgenteLocal()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"
+                />
+                <path
+                  d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"
+                />
+              </svg>
+              Baixar Agente Local
+              <span class="badge text-bg-warning ms-1">Em breve</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   @if (facade.isCertificateModalOpen()) {
     <app-certificate-selector-modal
       [certificates]="facade.certificates()"
