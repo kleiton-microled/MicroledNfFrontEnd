@@ -1,0 +1,4 @@
+{
+  "notasFiscaisApiUrl": "http://localhost:5249/api/v1/notas-fiscais",
+  "localAgentBaseUrl": ""
+}

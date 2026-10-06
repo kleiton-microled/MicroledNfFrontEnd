@@ -29,7 +29,6 @@ export class ConfiguracoesNfseFacade {
   readonly isCertificateModalOpen = this._isCertificateModalOpen.asReadonly();
 
   initialize(): void {
-    this.openCertificateModal();
     this.loadCertificates();
   }
 
@@ -57,11 +56,16 @@ export class ConfiguracoesNfseFacade {
 
           if (currentSelected) {
             this._selectedCertificate.set(currentSelected);
+            this.closeCertificateModal();
+            return;
           }
+
+          this.openCertificateModal();
         },
         error: (error: unknown) => {
           this._certificates.set([]);
           this._certificatesErrorMessage.set(this.getFriendlyErrorMessage(error));
+          this.openCertificateModal();
         },
       });
   }

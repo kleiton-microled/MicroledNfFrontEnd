@@ -1,0 +1,4 @@
+{
+  "notasFiscaisApiUrl": "https://amktechsistemas.com.br/api/v1/notas-fiscais",
+  "localAgentBaseUrl": "http://localhost:5278"
+}
