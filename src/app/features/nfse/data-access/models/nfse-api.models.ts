@@ -376,6 +376,12 @@ export interface ProcessarRpsRequest {
 /** Mesmo contrato de {@link ProcessarRpsRequest} (prestador completo, tributos calculados, IBS/CBS). */
 export type GerarArquivoRpsRequest = ProcessarRpsRequest;
 
+/** Erro/alerta devolvido pelo LocalAgent (retorno da prefeitura ou validacao local). */
+export interface RetornoEventoResponse {
+  codigo: number;
+  descricao: string | null;
+}
+
 export interface GerarArquivoRpsResponse {
   success: boolean;
   isSentToWebService: boolean;
@@ -384,7 +390,7 @@ export interface GerarArquivoRpsResponse {
   protocol: string | null;
   message: string;
   warnings: string[];
-  errors: string[];
+  errors: RetornoEventoResponse[];
   nfeRpsKeys: string[];
 }
 
@@ -396,7 +402,7 @@ export interface ProcessarRpsResponse {
   protocol: string | null;
   message: string;
   warnings: string[];
-  errors: string[];
+  errors: RetornoEventoResponse[];
   nfeRpsKeys: string[];
 }
 
@@ -514,6 +520,33 @@ export interface PendingRpsResponse {
   request: PendingRpsApiRequest | null;
 }
 
+export interface PendingRpsCountResponse {
+  count: number;
+}
+
+export interface UpdateNfPagamentoAccessResponse {
+  success: boolean;
+  /** false quando a nota nao existe na tabela NF do Access. */
+  found: boolean;
+  message: string;
+}
+
+export interface QueuePendingRpsRequest {
+  request: ProcessarRpsRequest;
+  recordIds: number[];
+  /** Base de calculo federal do calculo de impostos; gravada na coluna BC do Access. */
+  baseCalculoFederal?: number | null;
+  /** Valor liquido da nota (calculo de impostos); gravado na coluna Valor_liquido do Access. */
+  valorLiquido?: number | null;
+}
+
+export interface QueuePendingRpsResponse {
+  success: boolean;
+  notaId: string | null;
+  message: string;
+  errors: string[];
+}
+
 export interface ConsultarStatusRpsRequest {
   numeroProtocolo: string;
   cnpjRemetente: string;
@@ -617,4 +650,46 @@ export interface NotaFiscalResponse extends NotaFiscalItemResponse {
   ibsAliqMunicipal?: string;
   ibsCstCbs?: string;
   ibsAliqCbs?: string;
+}
+
+export interface TomadorRequest {
+  cpfCnpj: string;
+  razaoSocial: string;
+  inscricaoMunicipal?: string | null;
+  inscricaoEstadual?: string | null;
+  email?: string | null;
+  tipoLogradouro?: string | null;
+  logradouro?: string | null;
+  numero?: string | null;
+  complemento?: string | null;
+  bairro?: string | null;
+  uf?: string | null;
+  codigoMunicipio?: string | null;
+  cep?: string | null;
+}
+
+export interface TomadorResponse {
+  id: string;
+  cpfCnpj: string;
+  razaoSocial: string;
+  inscricaoMunicipal: string | null;
+  inscricaoEstadual: string | null;
+  email: string | null;
+  tipoLogradouro: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  uf: string | null;
+  codigoMunicipio: string | null;
+  cep: string | null;
+  criadoEm: string;
+  alteradoEm: string | null;
+}
+
+export interface PagedTomadorResponse {
+  items: TomadorResponse[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }

@@ -22,6 +22,7 @@ export class NfseSidebarComponent {
     { label: 'Dashboard', route: '/nfse/dashboard', icon: 'bi-speedometer2' },
     { label: 'Lista de NFs', route: '/nfse/lista-notas-fiscais', icon: 'bi-receipt' },
     { label: 'Emissao NFSe', route: '/nfse/emissao-nfse', icon: 'bi-file-earmark-plus' },
+    { label: 'Tomadores', route: '/nfse/tomadores', icon: 'bi-people' },
     { label: 'Consulta NFSe', route: '/nfse/consulta-nfse', icon: 'bi-search' },
     { label: 'Cancelamento NFSe', route: '/nfse/cancelamento-nfse', icon: 'bi-x-circle' },
     { label: 'Configuracoes', route: '/nfse/configuracoes-nfse', icon: 'bi-gear' },

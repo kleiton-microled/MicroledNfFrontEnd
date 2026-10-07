@@ -12,19 +12,22 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { merge } from 'rxjs';
+import { merge, of, Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 import {
   filterPrestadores,
-  filterTomadores,
+  formToTomadorRequest,
+  getTomadorEnderecoPendencias,
   normalizeDigits,
   prestadorTemplateToFormPatch,
   resolveUniquePrestadorTemplate,
   type PrestadorTemplate,
-  type TomadorTemplate,
-  tomadorTemplateToFormPatch,
+  tomadorToFormPatch,
 } from './data/local-clients.storage';
+import { NfseApiError, type TomadorResponse } from '../../data-access/models/nfse-api.models';
+import { TomadoresApiService } from '../../data-access/services/tomadores-api.service';
 import { EmissaoRpsTesteFacade } from './facades/emissao-rps-teste.facade';
 import {
   applyCertificateToEmissaoRpsTesteFormValue,
@@ -59,6 +62,9 @@ const PRESTADOR_CNPJ_CODIGO_SERVICO_NBS = normalizeDigits('02126914000129');
 const PRESTADOR_CODIGO_SERVICO_PADRAO = '02919';
 const PRESTADOR_NBS_PADRAO = '115022000';
 
+const MIN_TOMADOR_CPF_QUERY_LEN = 3;
+const MIN_TOMADOR_RAZAO_QUERY_LEN = 2;
+
 @Component({
   selector: 'app-emissao-nfse-page',
   standalone: true,
@@ -71,6 +77,8 @@ export class EmissaoNfsePageComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly tomadoresApi = inject(TomadoresApiService);
+  private readonly tomadorQuery$ = new Subject<string>();
 
   protected readonly facade = inject(EmissaoRpsTesteFacade);
   protected readonly form = this.formBuilder.nonNullable.group(getDefaultEmissaoRpsTesteFormValue());
@@ -80,8 +88,11 @@ export class EmissaoNfsePageComponent implements OnInit {
 
   protected readonly prestadorMatches = signal<PrestadorTemplate[]>([]);
   protected readonly showPrestadorSuggestions = signal(false);
-  protected readonly tomadorMatches = signal<TomadorTemplate[]>([]);
+  protected readonly tomadorMatches = signal<TomadorResponse[]>([]);
   protected readonly showTomadorSuggestions = signal(false);
+  /** Tomador do cadastro correspondente ao CPF/CNPJ atual do formulario (null = nao cadastrado). */
+  protected readonly tomadorCadastrado = signal<TomadorResponse | null>(null);
+  protected readonly isSavingTomador = signal(false);
 
   constructor() {
     effect(() => {
@@ -177,6 +188,44 @@ export class EmissaoNfsePageComponent implements OnInit {
           this.refreshTomadorMatches();
         }
       });
+
+    this.tomadorQuery$
+      .pipe(
+        debounceTime(250),
+        distinctUntilChanged(),
+        switchMap((query) =>
+          query
+            ? this.tomadoresApi.search(query, 1, 10).pipe(
+                map((page) => page.items),
+                catchError(() => of([] as TomadorResponse[])),
+              )
+            : of([] as TomadorResponse[]),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((items) => this.tomadorMatches.set(items));
+
+    // CPF (11) / CNPJ (14) completo: busca no cadastro e preenche o tomador automaticamente.
+    this.form.controls.tomadorCpfCnpj.valueChanges
+      .pipe(
+        map((value) => normalizeDigits(value)),
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((digits) =>
+          digits.length === 11 || digits.length === 14
+            ? this.tomadoresApi.getByCpfCnpj(digits).pipe(catchError(() => of(null)))
+            : of(null),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((tomador) => {
+        this.tomadorCadastrado.set(tomador);
+        if (tomador) {
+          this.applyTomador(tomador);
+        }
+      });
+
+    this.syncTomadorCadastrado();
   }
 
   @HostListener('document:click', ['$event'])
@@ -220,18 +269,114 @@ export class EmissaoNfsePageComponent implements OnInit {
   }
 
   protected refreshTomadorMatches(): void {
-    this.tomadorMatches.set(
-      filterTomadores(
-        this.form.controls.tomadorCpfCnpj.getRawValue(),
-        this.form.controls.tomadorRazaoSocial.getRawValue(),
-      ),
-    );
+    const digits = normalizeDigits(this.form.controls.tomadorCpfCnpj.getRawValue());
+    const razao = this.form.controls.tomadorRazaoSocial.getRawValue().trim();
+    let query = '';
+    if (digits.length >= MIN_TOMADOR_CPF_QUERY_LEN) {
+      query = digits;
+    } else if (razao.length >= MIN_TOMADOR_RAZAO_QUERY_LEN) {
+      query = razao;
+    }
+
+    if (!query) {
+      this.tomadorMatches.set([]);
+    }
+    this.tomadorQuery$.next(query);
   }
 
-  protected selectTomador(item: TomadorTemplate): void {
-    this.form.patchValue(tomadorTemplateToFormPatch(item), { emitEvent: false });
+  protected selectTomador(item: TomadorResponse): void {
+    this.applyTomador(item);
+    this.tomadorCadastrado.set(item);
     this.showTomadorSuggestions.set(false);
     this.tomadorMatches.set([]);
+  }
+
+  protected formatCpfCnpj(value: string): string {
+    const d = normalizeDigits(value);
+    if (d.length === 14) {
+      return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    }
+    if (d.length === 11) {
+      return d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+    }
+    return value;
+  }
+
+  /** Cadastra o tomador do formulario ou atualiza o cadastro existente com os dados atuais. */
+  protected saveTomadorNoCadastro(): void {
+    const request = formToTomadorRequest(this.form.getRawValue());
+    if (request.cpfCnpj.length !== 11 && request.cpfCnpj.length !== 14) {
+      void Swal.fire({ icon: 'warning', title: 'Informe um CPF (11) ou CNPJ (14 digitos) valido.' });
+      return;
+    }
+    if (!request.razaoSocial) {
+      void Swal.fire({ icon: 'warning', title: 'Informe a razao social do tomador.' });
+      return;
+    }
+
+    const existing = this.tomadorCadastrado();
+    const operation$ = existing
+      ? this.tomadoresApi.update(existing.id, request)
+      : this.tomadoresApi.create(request);
+
+    this.isSavingTomador.set(true);
+    operation$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (saved) => {
+        this.isSavingTomador.set(false);
+        this.tomadorCadastrado.set(saved);
+        void Swal.fire({
+          icon: 'success',
+          title: existing ? 'Cadastro do tomador atualizado.' : 'Tomador cadastrado.',
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      },
+      error: (error: unknown) => {
+        this.isSavingTomador.set(false);
+        const message =
+          error instanceof NfseApiError ? error.message : 'Nao foi possivel salvar o tomador.';
+        void Swal.fire({ icon: 'error', title: 'Erro ao salvar tomador', text: message });
+      },
+    });
+  }
+
+  /** A prefeitura rejeita o envio sem o endereco completo do tomador/destinatario (erros 251-253). */
+  private validateTomadorEndereco(): boolean {
+    const pendencias = getTomadorEnderecoPendencias(this.form.getRawValue());
+    if (pendencias.length === 0) {
+      return true;
+    }
+
+    void Swal.fire({
+      icon: 'warning',
+      title: 'Endereco do tomador incompleto',
+      html:
+        '<p class="text-start mb-2">A prefeitura exige o endereco completo do tomador. Preencha:</p>' +
+        `<ul class="text-start mb-2">${pendencias.map((p) => `<li>${p}</li>`).join('')}</ul>` +
+        '<p class="text-start mb-0 small">Dica: use "Salvar no cadastro" para que as proximas notas deste tomador ja venham preenchidas.</p>',
+    });
+    return false;
+  }
+
+  private applyTomador(tomador: TomadorResponse): void {
+    this.form.patchValue(tomadorToFormPatch(tomador), { emitEvent: false });
+  }
+
+  /** Para CPF/CNPJ preenchido sem digitacao (reenvio/duplicar), apenas identifica se ja esta cadastrado. */
+  private syncTomadorCadastrado(): void {
+    const digits = normalizeDigits(this.form.controls.tomadorCpfCnpj.getRawValue());
+    if (digits.length !== 11 && digits.length !== 14) {
+      return;
+    }
+
+    this.tomadoresApi
+      .getByCpfCnpj(digits)
+      .pipe(
+        catchError(() => of(null)),
+        filter((tomador): tomador is TomadorResponse => tomador !== null),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((tomador) => this.tomadorCadastrado.set(tomador));
   }
 
   protected calculateTaxes(): void {
@@ -244,12 +389,18 @@ export class EmissaoNfsePageComponent implements OnInit {
     if (!this.facade.taxesCalculatedSuccessfully()) {
       return;
     }
+    if (!this.validateTomadorEndereco()) {
+      return;
+    }
 
     this.facade.generateFiles(mapFormToGerarArquivoRpsRequest(this.form.getRawValue()));
   }
 
   protected async confirmProcessRps(): Promise<void> {
     if (!this.facade.taxesCalculatedSuccessfully()) {
+      return;
+    }
+    if (!this.validateTomadorEndereco()) {
       return;
     }
 
@@ -303,11 +454,7 @@ export class EmissaoNfsePageComponent implements OnInit {
   }
 
   protected importPendingRps(): void {
-    this.facade.importPendingRps(this.form.getRawValue(), (value) => {
-      this.form.patchValue(value, { emitEvent: false });
-      this.syncIbsLocalPrestacaoWithPrestadorMunicipio();
-      this.applyPrestadorServicoNbsRule();
-    });
+    void this.router.navigateByUrl('/nfse/emissao-nfse/lote');
   }
 
   private syncIbsLocalPrestacaoWithPrestadorMunicipio(): void {

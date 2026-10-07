@@ -1,0 +1,33 @@
+<section class="d-flex flex-column gap-4">
+  <header class="d-flex flex-column gap-2">
+    <span class="badge rounded-pill text-bg-primary align-self-start">Emissao em lote</span>
+    <div>
+      <h1 class="h2 mb-2">Importar RPS do Access</h1>
+      <p class="text-secondary mb-0">
+        Cada RPS e importado individualmente, com calculo de impostos e geracao do XML, e entra na lista como
+        <strong>A processar</strong>. O envio a prefeitura e feito depois, na lista de notas.
+      </p>
+    </div>
+  </header>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      @if (running()) {
+        <p class="mb-2">Importando {{ current() }} de {{ total() }}...</p>
+        <div class="progress mb-3" role="progressbar" [attr.aria-valuenow]="current()" [attr.aria-valuemax]="total()">
+          <div
+            class="progress-bar progress-bar-striped progress-bar-animated"
+            [style.width.%]="total() ? (current() / total()) * 100 : 0"
+          ></div>
+        </div>
+      } @else if (finished()) {
+        <p class="mb-3">
+          Importados: <strong>{{ imported() }}</strong> · Falhas: <strong>{{ failed() }}</strong>
+        </p>
+        <button type="button" class="btn btn-primary" (click)="goToLista()">Ir para a lista de notas</button>
+      }
+
+      <pre class="bg-dark text-light rounded p-3 mt-3 mb-0 small" style="min-height: 180px; white-space: pre-wrap;">{{ logLines().join('\n') }}</pre>
+    </div>
+  </div>
+</section>

@@ -297,9 +297,28 @@
             <span class="emissao-form-section__chevron" aria-hidden="true"></span>
           </summary>
           <div class="card-body pt-0 border-top">
-          <p class="text-secondary small mb-3">
-            Digite CNPJ ou razao social para sugestoes do cadastro local.
-          </p>
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <p class="text-secondary small mb-0">
+              Digite CPF/CNPJ ou razao social para sugestoes do cadastro de tomadores. CPF/CNPJ completo
+              preenche os dados automaticamente.
+            </p>
+            <div class="d-flex align-items-center gap-2">
+              @if (tomadorCadastrado()) {
+                <span class="badge text-bg-success"><i class="bi bi-check2-circle me-1"></i>Cadastrado</span>
+              }
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                [disabled]="isSavingTomador()"
+                (click)="saveTomadorNoCadastro()"
+              >
+                @if (isSavingTomador()) {
+                  <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                }
+                {{ tomadorCadastrado() ? 'Atualizar cadastro' : 'Salvar no cadastro' }}
+              </button>
+            </div>
+          </div>
           <div class="col-12 position-relative mb-1" #tomadorAcHost>
             <div class="row g-3">
               <div class="col-12 col-md-4">
@@ -350,7 +369,7 @@
                 class="emissao-autocomplete-dropdown list-group position-absolute w-100 shadow-sm mt-1"
                 role="listbox"
               >
-                @for (item of tomadorMatches(); track item.cnpj + item.razaoSocial) {
+                @for (item of tomadorMatches(); track item.id) {
                   <li class="list-group-item list-group-item-action py-2 px-3">
                     <button
                       type="button"
@@ -358,7 +377,7 @@
                       (click)="selectTomador(item)"
                     >
                       <span class="fw-semibold d-block">{{ item.razaoSocial }}</span>
-                      <span class="small text-secondary">{{ item.cnpj }}</span>
+                      <span class="small text-secondary">{{ formatCpfCnpj(item.cpfCnpj) }}</span>
                     </button>
                   </li>
                 }
@@ -736,7 +755,7 @@
             @if (facade.isImportingPending()) {
               <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
             }
-            Importar RPS pendente
+            Importar RPS do Access
           </button>
           <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Limpar formulário</button>
         </div>
@@ -792,8 +811,8 @@
             <div class="alert alert-danger mb-0">
               <div class="fw-semibold mb-2">Erros</div>
               <ul class="mb-0 ps-3">
-                @for (error of result.errors; track error) {
-                  <li>{{ error }}</li>
+                @for (error of result.errors; track $index) {
+                  <li><strong>{{ error.codigo }}</strong> - {{ error.descricao }}</li>
                 }
               </ul>
             </div>
@@ -880,8 +899,8 @@
             <div class="alert alert-danger mb-0">
               <div class="fw-semibold mb-2">Erros</div>
               <ul class="mb-0 ps-3">
-                @for (error of processResult.errors; track error) {
-                  <li>{{ error }}</li>
+                @for (error of processResult.errors; track $index) {
+                  <li><strong>{{ error.codigo }}</strong> - {{ error.descricao }}</li>
                 }
               </ul>
             </div>

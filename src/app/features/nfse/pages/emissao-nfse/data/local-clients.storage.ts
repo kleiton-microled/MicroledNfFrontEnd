@@ -1,3 +1,4 @@
+import type { TomadorRequest, TomadorResponse } from '../../../data-access/models/nfse-api.models';
 import type { EmissaoRpsTesteFormValue } from '../models/emissao-rps-teste.models';
 
 /** Cadastro local de prestador (endereco + identificacao). CNPJ pode ficar vazio se vier so do certificado. */
@@ -13,22 +14,6 @@ export interface PrestadorTemplate {
   bairro: string;
   codigoMunicipio: string;
   uf: string;
-  cep: string;
-}
-
-export interface TomadorTemplate {
-  cnpj: string;
-  inscricaoMunicipal: string;
-  inscricaoEstadual: string;
-  razaoSocial: string;
-  email: string;
-  tipoLogradouro: string;
-  logradouro: string;
-  numero: string;
-  complemento: string;
-  bairro: string;
-  uf: string;
-  codigoMunicipio: string;
   cep: string;
 }
 
@@ -74,99 +59,6 @@ export const PRESTADORES_STORAGE: readonly PrestadorTemplate[] = [
     codigoMunicipio: '3550308',
     uf: 'SP',
     cep: '05424-150',
-  }
-];
-
-export const TOMADORES_STORAGE: readonly TomadorTemplate[] = [
-  {
-    cnpj: '58.138.058/0031-00',
-    inscricaoMunicipal: '',
-    inscricaoEstadual: '',
-    razaoSocial: 'EUDMARCO S/A SERVICOS E COMERCIO INTERNACIONAL',
-    email: 'xml@abainfra.com.br',
-    tipoLogradouro: 'AV',
-    logradouro: 'Senador Dantas',
-    numero: '206',
-    complemento: '',
-    bairro: 'Macuco',
-    uf: 'SP',
-    codigoMunicipio: '3548500',
-    cep: '11015-300',
-  },
-  {
-    cnpj: '02.390.435/0001-15',
-    inscricaoMunicipal: '',
-    inscricaoEstadual: '',
-    razaoSocial: 'ECOPORTO SANTOS S/A',
-    email: 'administrativoti.op@ecoportosantos.com.br',
-    tipoLogradouro: 'AV',
-    logradouro: 'ENGENHEIRO ALVES FREIRE',
-    numero: 'S/Nº',
-    complemento: '',
-    bairro: 'CAIS SABOO',
-    uf: 'SP',
-    codigoMunicipio: '3548500',
-    cep: '11010-230',
-  },
-  {
-    cnpj: '02.126.914/0001-29',
-    inscricaoMunicipal: '3.768.428-0',
-    inscricaoEstadual: '',
-    razaoSocial: 'MICROLED INFORMATICA E SERVICOS LTDA',
-    email: 'ipsilva@microled.com.br',
-    tipoLogradouro: 'AV',
-    logradouro: 'IRAI',
-    numero: '00075',
-    complemento: 'CJ 21 TORRE A',
-    bairro: 'INDIANOPOLIS',
-    uf: 'SP',
-    codigoMunicipio: '3550308',
-    cep: '04082-000',
-  },
-  {
-    cnpj: '09.218.626/0001-43',
-    inscricaoMunicipal: '3.698.180-0',
-    inscricaoEstadual: '',
-    razaoSocial: 'SPLOGICA SISTEMAS E CONSULTORIA LTDA',
-    email: 'ipsilva@microled.com.br',
-    tipoLogradouro: 'AV',
-    logradouro: 'IRAI',
-    numero: '00075',
-    complemento: 'CJ 21 TORRE A',
-    bairro: 'INDIANOPOLIS',
-    uf: 'SP',
-    codigoMunicipio: '3550308',
-    cep: '04082-000',
-  },
-  {
-    cnpj: '53.730.495/0001-70',
-    inscricaoMunicipal: '3.698.180-0',
-    inscricaoEstadual: '',
-    razaoSocial: 'TERMARES TERMINAIS MARITIMOS ESPECIALIZADOS LTDA',
-    email: 'administrativoti.op@ecoportosantos.com.br',
-    tipoLogradouro: 'AV',
-    logradouro: 'C DO SABOO, S/N',
-    numero: 'S/N',
-    complemento: 'CAIS PATIO 1 2 E 3',
-    bairro: 'SABOO',
-    uf: 'SP',
-    codigoMunicipio: '3550308',
-    cep: '11010-970',
-  },
-  {
-    cnpj: '45.455.869/0001-69',
-    inscricaoMunicipal: '',
-    inscricaoEstadual: '',
-    razaoSocial: 'M6 CARGO LOGISTICA LTDA',
-    email: 'FISCAL@TECNOCONTABILIDADE.COM.BR',
-    tipoLogradouro: 'PC',
-    logradouro: 'PC REPUBLICA',
-    numero: 'S/N',
-    complemento: 'SALA 42',
-    bairro: 'CENTRO',
-    uf: 'SP',
-    codigoMunicipio: '3550308',
-    cep: '11.013-922',
   }
 ];
 
@@ -238,23 +130,6 @@ export function resolveUniquePrestadorTemplate(cnpjInput: string, razaoInput: st
   return null;
 }
 
-export function filterTomadores(cnpjInput: string, razaoInput: string): TomadorTemplate[] {
-  const d = normalizeDigits(cnpjInput);
-  const r = razaoInput.trim().toLowerCase();
-  if (d.length < MIN_CNPJ_QUERY_LEN && r.length < MIN_RAZAO_QUERY_LEN) {
-    return [];
-  }
-
-  return TOMADORES_STORAGE.filter((p) => {
-    const pd = normalizeDigits(p.cnpj);
-    const pr = p.razaoSocial.toLowerCase();
-    const byCnpj =
-      d.length >= MIN_CNPJ_QUERY_LEN && pd.length > 0 && (pd.includes(d) || d.includes(pd));
-    const byRazao = r.length >= MIN_RAZAO_QUERY_LEN && pr.includes(r);
-    return byCnpj || byRazao;
-  });
-}
-
 export function prestadorTemplateToFormPatch(p: PrestadorTemplate): Partial<EmissaoRpsTesteFormValue> {
   const cnpjDigits = normalizeDigits(p.cnpj);
   const imDigits = normalizeDigits(p.inscricaoMunicipal);
@@ -280,20 +155,90 @@ export function prestadorTemplateToFormPatch(p: PrestadorTemplate): Partial<Emis
   return patch;
 }
 
-export function tomadorTemplateToFormPatch(t: TomadorTemplate): Partial<EmissaoRpsTesteFormValue> {
+export function tomadorToFormPatch(t: TomadorResponse): Partial<EmissaoRpsTesteFormValue> {
   return {
-    tomadorCpfCnpj: normalizeDigits(t.cnpj),
-    tomadorInscricaoMunicipal: t.inscricaoMunicipal.trim(),
-    tomadorInscricaoEstadual: t.inscricaoEstadual.trim(),
-    tomadorRazaoSocial: t.razaoSocial.trim(),
-    tomadorEmail: t.email.trim(),
-    enderecoTipoLogradouro: t.tipoLogradouro.trim(),
-    enderecoLogradouro: t.logradouro.trim(),
-    enderecoNumero: t.numero.trim(),
-    enderecoComplemento: t.complemento.trim(),
-    enderecoBairro: t.bairro.trim(),
-    enderecoUf: t.uf.trim().toUpperCase(),
-    enderecoCodigoMunicipio: t.codigoMunicipio.trim(),
-    enderecoCep: normalizeDigits(t.cep),
+    tomadorCpfCnpj: normalizeDigits(t.cpfCnpj),
+    tomadorInscricaoMunicipal: t.inscricaoMunicipal ?? '',
+    tomadorInscricaoEstadual: t.inscricaoEstadual ?? '',
+    tomadorRazaoSocial: t.razaoSocial,
+    tomadorEmail: t.email ?? '',
+    enderecoTipoLogradouro: t.tipoLogradouro ?? '',
+    enderecoLogradouro: t.logradouro ?? '',
+    enderecoNumero: t.numero ?? '',
+    enderecoComplemento: t.complemento ?? '',
+    enderecoBairro: t.bairro ?? '',
+    enderecoUf: (t.uf ?? '').toUpperCase(),
+    enderecoCodigoMunicipio: t.codigoMunicipio ?? '',
+    enderecoCep: normalizeDigits(t.cep ?? ''),
   };
+}
+
+export function formToTomadorRequest(form: EmissaoRpsTesteFormValue): TomadorRequest {
+  return {
+    cpfCnpj: normalizeDigits(form.tomadorCpfCnpj),
+    razaoSocial: form.tomadorRazaoSocial.trim(),
+    inscricaoMunicipal: form.tomadorInscricaoMunicipal,
+    inscricaoEstadual: form.tomadorInscricaoEstadual,
+    email: form.tomadorEmail,
+    tipoLogradouro: form.enderecoTipoLogradouro,
+    logradouro: form.enderecoLogradouro,
+    numero: form.enderecoNumero,
+    complemento: form.enderecoComplemento,
+    bairro: form.enderecoBairro,
+    uf: form.enderecoUf,
+    codigoMunicipio: form.enderecoCodigoMunicipio,
+    cep: form.enderecoCep,
+  };
+}
+
+/** Razao social padrao gravada pelo leitor do Access quando o RPS nao traz o nome do tomador. */
+const TOMADOR_RAZAO_PLACEHOLDER = 'TOMADOR';
+
+function isBlankOrZero(value: string | null | undefined): boolean {
+  const trimmed = (value ?? '').trim();
+  return trimmed === '' || /^0+$/.test(trimmed);
+}
+
+/**
+ * Completa os campos do tomador que vieram vazios/zerados (ex.: RPS do Access sem endereco)
+ * com os dados do cadastro de tomadores. Campos ja preenchidos no RPS sao mantidos.
+ */
+export function mergeTomadorCadastroIntoForm(
+  form: EmissaoRpsTesteFormValue,
+  tomador: TomadorResponse,
+): EmissaoRpsTesteFormValue {
+  const result: Record<string, unknown> = { ...form };
+  for (const [key, value] of Object.entries(tomadorToFormPatch(tomador))) {
+    if (typeof value !== 'string' || isBlankOrZero(value)) {
+      continue;
+    }
+    const current = String(result[key] ?? '');
+    const isPlaceholder =
+      key === 'tomadorRazaoSocial' && current.trim().toUpperCase() === TOMADOR_RAZAO_PLACEHOLDER;
+    if (isBlankOrZero(current) || isPlaceholder) {
+      result[key] = value;
+    }
+  }
+  return result as unknown as EmissaoRpsTesteFormValue;
+}
+
+/**
+ * Campos de endereco do tomador exigidos pela prefeitura de SP. O mesmo endereco vai no
+ * destinatario do IBS/CBS (erros 251 bairro, 252 logradouro, 253 numero) e Cidade/CEP nao
+ * podem ser 0 (erro 1001 tpCidade/tpCEP).
+ */
+const TOMADOR_ENDERECO_OBRIGATORIO: readonly [keyof EmissaoRpsTesteFormValue, string][] = [
+  ['enderecoLogradouro', 'Logradouro'],
+  ['enderecoNumero', 'Numero'],
+  ['enderecoBairro', 'Bairro'],
+  ['enderecoCodigoMunicipio', 'Codigo municipio'],
+  ['enderecoUf', 'UF'],
+  ['enderecoCep', 'CEP'],
+];
+
+/** Lista os campos obrigatorios do endereco do tomador que estao vazios/zerados. */
+export function getTomadorEnderecoPendencias(form: EmissaoRpsTesteFormValue): string[] {
+  return TOMADOR_ENDERECO_OBRIGATORIO.filter(([key]) => isBlankOrZero(String(form[key] ?? ''))).map(
+    ([, label]) => label,
+  );
 }

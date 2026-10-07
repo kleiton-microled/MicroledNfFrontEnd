@@ -24,9 +24,23 @@ export const NFSE_ROUTES: Routes = [
           ),
       },
       {
+        path: 'emissao-nfse/lote',
+        loadComponent: () =>
+          import('./pages/importacao-lote-rps/importacao-lote-rps-page').then(
+            (m) => m.ImportacaoLoteRpsPageComponent,
+          ),
+      },
+      {
         path: 'emissao-nfse',
         loadComponent: () =>
           import('./pages/emissao-nfse/emissao-nfse-page').then((m) => m.EmissaoNfsePageComponent),
+      },
+      {
+        path: 'tomadores',
+        loadComponent: () =>
+          import('./pages/cadastro-tomadores/cadastro-tomadores-page').then(
+            (m) => m.CadastroTomadoresPageComponent,
+          ),
       },
       {
         path: 'cancelamento-nfse',

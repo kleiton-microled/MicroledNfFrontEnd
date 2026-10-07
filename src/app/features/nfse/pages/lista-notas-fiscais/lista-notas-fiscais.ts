@@ -6,7 +6,7 @@ import { finalize } from 'rxjs';
 
 import { ListaNotasFiscaisFacade } from './facades/lista-notas-fiscais.facade';
 import { NfseApiService } from '../../data-access/services/nfse-api.service';
-import { NfseApiError, NotaFiscalItemResponse, NotaFiscalResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
+import { NfseApiError, NotaFiscalEventoItem, NotaFiscalItemResponse, NotaFiscalResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
 import { ReenvioNotaState } from './models/reenvio-nota-state';
 import { DuplicarNotaState } from './models/duplicar-nota-state';
 
@@ -109,6 +109,7 @@ export class ListaNotasFiscaisComponent implements OnInit {
       .pipe(finalize(() => this.modalSaving.set(false)))
       .subscribe({
         next: () => {
+          this.syncPagamentoNfAccess(item);
           this.closeModal();
           this.facade.loadPage();
         },
@@ -121,10 +122,56 @@ export class ListaNotasFiscaisComponent implements OnInit {
       });
   }
 
+  /**
+   * Depois de salvar no sistema, replica Pago / dt_pgto / valor_depositado na tabela NF do Access.
+   * Falha aqui nao desfaz o pagamento salvo; apenas avisa.
+   */
+  private syncPagamentoNfAccess(item: NotaFiscalItemResponse): void {
+    if (!item.numeroNota) {
+      return;
+    }
+
+    const pago = this.modalDraft.pago;
+    const numeroNota = item.numeroNota;
+    this.nfseApiService
+      .atualizarPagamentoNfAccess(numeroNota, {
+        pago,
+        // Data local (yyyy-MM-dd), sem conversao para UTC.
+        dataPagamento: pago && this.modalDraft.dataPagamento ? this.modalDraft.dataPagamento : null,
+        valorDepositado: pago ? this.modalDraft.valorDepositado : null,
+      })
+      .subscribe({
+        next: (response) => {
+          if (!response.found) {
+            alert(
+              'Pagamento salvo no sistema, mas a NF ' + numeroNota + ' nao existe na tabela NF do Access.',
+            );
+          }
+        },
+        error: (error: unknown) => {
+          const message = error instanceof NfseApiError ? error.message : 'erro desconhecido';
+          alert('Pagamento salvo no sistema, mas nao foi possivel atualizar a tabela NF do Access: ' + message);
+        },
+      });
+  }
+
   protected getStatusLabel(status: string): string {
     switch (status?.toLowerCase()) {
       case 'authorized':
         return 'Autorizada';
+      case 'pending':
+      case 'generated':
+        return 'A processar';
+      case 'sent':
+      case 'processing':
+        return 'Em processamento';
+      case 'rejected':
+        return 'Rejeitada';
+      case 'cancelled':
+      case 'cancelada':
+        return 'Cancelada';
+      case 'error':
+        return 'Erro';
       default:
         return status ?? '-';
     }
@@ -143,6 +190,8 @@ export class ListaNotasFiscaisComponent implements OnInit {
       case 'cancelada':
         return 'text-bg-danger';
       case 'pendente':
+      case 'pending':
+      case 'generated':
         return 'text-bg-warning';
       case 'rejeitada':
       case 'rejected':
@@ -155,7 +204,17 @@ export class ListaNotasFiscaisComponent implements OnInit {
   }
 
   protected hasEventos(item: NotaFiscalItemResponse): boolean {
-    return (item.erros?.length ?? 0) > 0 || (item.alertas?.length ?? 0) > 0;
+    return this.errosDaNota(item).length > 0 || (item.alertas?.length ?? 0) > 0;
+  }
+
+  /** Erros do envio feito agora (sessao) ou os gravados na nota (retorno da prefeitura). */
+  protected errosDaNota(item: NotaFiscalItemResponse): NotaFiscalEventoItem[] {
+    return this.facade.sendErrors()[item.id] ?? item.erros ?? [];
+  }
+
+  /** Erros ficam sempre visiveis abaixo da linha; alertas so ao expandir. */
+  protected showEventosRow(item: NotaFiscalItemResponse): boolean {
+    return this.errosDaNota(item).length > 0 || (this.isExpanded(item.id) && this.hasEventos(item));
   }
 
   protected consultarProtocolo(item: NotaFiscalItemResponse): void {

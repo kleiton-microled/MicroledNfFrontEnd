@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { catchError, finalize, map, of, switchMap } from 'rxjs';
 
 import {
   CertificateResponse,
@@ -11,6 +11,8 @@ import {
   ProcessarRpsResponse,
 } from '../../../data-access/models/nfse-api.models';
 import { NfseApiService } from '../../../data-access/services/nfse-api.service';
+import { TomadoresApiService } from '../../../data-access/services/tomadores-api.service';
+import { mergeTomadorCadastroIntoForm, normalizeDigits } from '../data/local-clients.storage';
 import {
   applyMemoriaCalculoVencimentoDiasCorridos,
   buildNfseSpCalculateTaxesRequest,
@@ -24,6 +26,7 @@ import {
 @Injectable()
 export class EmissaoRpsTesteFacade {
   private readonly nfseApiService = inject(NfseApiService);
+  private readonly tomadoresApi = inject(TomadoresApiService);
 
   private readonly _isLoading = signal(false);
   private readonly _errorMessage = signal<string | null>(null);
@@ -172,15 +175,32 @@ export class EmissaoRpsTesteFacade {
 
     this.nfseApiService
       .obterPendingRps()
-      .pipe(finalize(() => this._isImportingPending.set(false)))
-      .subscribe({
-        next: (response) => {
+      .pipe(
+        switchMap((response) => {
           if (response.count === 0 || !response.request?.rpsList?.length) {
+            return of(null);
+          }
+
+          // Completa nome/endereco do tomador com o cadastro (o Access traz apenas o CNPJ).
+          const mapped = mapPendingRpsResponseToEmissaoRpsTesteFormValue(response, currentForm);
+          const cpfCnpj = normalizeDigits(mapped.tomadorCpfCnpj);
+          if (cpfCnpj.length !== 11 && cpfCnpj.length !== 14) {
+            return of(mapped);
+          }
+          return this.tomadoresApi.getByCpfCnpj(cpfCnpj).pipe(
+            catchError(() => of(null)),
+            map((tomador) => (tomador ? mergeTomadorCadastroIntoForm(mapped, tomador) : mapped)),
+          );
+        }),
+        finalize(() => this._isImportingPending.set(false)),
+      )
+      .subscribe({
+        next: (mapped) => {
+          if (!mapped) {
             this._importPendingErrorMessage.set('Nao ha RPS pendente para importar.');
             return;
           }
 
-          const mapped = mapPendingRpsResponseToEmissaoRpsTesteFormValue(response, currentForm);
           onMapped(mapped);
           this._taxesCalculatedSuccessfully.set(false);
           this._memoriaCalculo.set([]);
@@ -205,7 +225,7 @@ export class EmissaoRpsTesteFacade {
           this._result.set(response);
 
           if (!response.success) {
-            this._errorMessage.set(response.errors[0] ?? response.message);
+            this._errorMessage.set(response.errors[0]?.descricao ?? response.message);
           }
         },
         error: (error: unknown) => {
@@ -229,7 +249,7 @@ export class EmissaoRpsTesteFacade {
           this._protocol.set(response.protocol ?? '');
 
           if (!response.success) {
-            this._processErrorMessage.set(response.errors[0] ?? response.message);
+            this._processErrorMessage.set(response.errors[0]?.descricao ?? response.message);
           }
         },
         error: (error: unknown) => {

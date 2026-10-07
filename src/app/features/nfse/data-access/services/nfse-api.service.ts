@@ -34,9 +34,13 @@ import {
   NotaFiscalResponse,
   OperacaoNfseResponse,
   PagedNotaFiscalResponse,
+  PendingRpsCountResponse,
   PendingRpsResponse,
   ProcessarRpsRequest,
   ProcessarRpsResponse,
+  QueuePendingRpsRequest,
+  QueuePendingRpsResponse,
+  UpdateNfPagamentoAccessResponse,
   QueryParamValue,
   SelectCertificatePayload,
 } from '../models/nfse-api.models';
@@ -44,11 +48,15 @@ import { mapCertificateStorageErrorToUserMessage } from '../utils/certificate-st
 import {
   CERTIFICATES_API_URL,
   CERTIFICATES_SELECT_API_URL,
+  LOCAL_ACCESS_NF_API_URL,
   LOCAL_ACCESS_PENDING_RPS_API_URL,
+  LOCAL_ACCESS_PENDING_RPS_COUNT_API_URL,
   LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL,
   LOCAL_NFE_CANCEL_API_URL,
   LOCAL_NFE_CONSULT_API_URL,
   LOCAL_RPS_PROCESS_API_URL,
+  LOCAL_RPS_PROCESS_QUEUED_API_URL,
+  LOCAL_RPS_QUEUE_PENDING_API_URL,
   LOCAL_RPS_STATUS_API_URL,
   LOCAL_RPS_GENERATE_FILES_API_URL,
   NFSE_API_BASE_URL,
@@ -67,8 +75,12 @@ export class NfseApiService {
   private readonly localNfeConsultApiUrl = inject(LOCAL_NFE_CONSULT_API_URL);
   private readonly localRpsGenerateFilesApiUrl = inject(LOCAL_RPS_GENERATE_FILES_API_URL);
   private readonly localRpsProcessApiUrl = inject(LOCAL_RPS_PROCESS_API_URL);
+  private readonly localRpsQueuePendingApiUrl = inject(LOCAL_RPS_QUEUE_PENDING_API_URL);
+  private readonly localRpsProcessQueuedApiUrl = inject(LOCAL_RPS_PROCESS_QUEUED_API_URL);
   private readonly localRpsStatusApiUrl = inject(LOCAL_RPS_STATUS_API_URL);
   private readonly localAccessPendingRpsApiUrl = inject(LOCAL_ACCESS_PENDING_RPS_API_URL);
+  private readonly localAccessNfApiUrl = inject(LOCAL_ACCESS_NF_API_URL);
+  private readonly localAccessPendingRpsCountApiUrl = inject(LOCAL_ACCESS_PENDING_RPS_COUNT_API_URL);
   private readonly localNfseSpCalculateTaxesApiUrl = inject(LOCAL_NFSE_SP_CALCULATE_TAXES_API_URL);
   private readonly notasFiscaisApiUrl = inject(NOTAS_FISCAIS_API_URL);
 
@@ -144,10 +156,30 @@ export class NfseApiService {
       .pipe(catchError((error) => this.handleError('consulta de certificados disponiveis', error)));
   }
 
-  obterPendingRps(): Observable<PendingRpsResponse> {
+  obterPendingRps(batchSize = 1): Observable<PendingRpsResponse> {
     return this.http
-      .get<PendingRpsResponse>(this.localAccessPendingRpsApiUrl)
+      .get<PendingRpsResponse>(this.localAccessPendingRpsApiUrl, {
+        params: new HttpParams().set('batchSize', String(batchSize)),
+      })
       .pipe(catchError((error) => this.handleError('consulta de RPS pendente', error)));
+  }
+
+  contarPendingRps(): Observable<PendingRpsCountResponse> {
+    return this.http
+      .get<PendingRpsCountResponse>(this.localAccessPendingRpsCountApiUrl)
+      .pipe(catchError((error) => this.handleError('contagem de RPS pendente', error)));
+  }
+
+  enqueuePendingRps(payload: QueuePendingRpsRequest): Observable<QueuePendingRpsResponse> {
+    return this.http
+      .post<QueuePendingRpsResponse>(this.localRpsQueuePendingApiUrl, payload)
+      .pipe(catchError((error) => this.handleError('importacao do RPS pendente', error)));
+  }
+
+  processarRpsEnfileirado(notaId: string): Observable<ProcessarRpsResponse> {
+    return this.http
+      .post<ProcessarRpsResponse>(`${this.localRpsProcessQueuedApiUrl}/${encodeURIComponent(notaId)}`, {})
+      .pipe(catchError((error) => this.handleError('processamento do RPS pendente', error)));
   }
 
   selecionarCertificado(payload: SelectCertificatePayload): Observable<void> {
@@ -236,6 +268,19 @@ export class NfseApiService {
         body,
       )
       .pipe(catchError((error) => this.handleError('atualizacao de pagamento', error)));
+  }
+
+  /** Replica o pagamento na tabela NF do Access (via agente local), pelo numero da NFS-e. */
+  atualizarPagamentoNfAccess(
+    numeroNota: string,
+    body: { pago: boolean; dataPagamento?: string | null; valorDepositado?: number | null },
+  ): Observable<UpdateNfPagamentoAccessResponse> {
+    return this.http
+      .patch<UpdateNfPagamentoAccessResponse>(
+        `${this.localAccessNfApiUrl}/${encodeURIComponent(numeroNota)}/pagamento`,
+        body,
+      )
+      .pipe(catchError((error) => this.handleError('atualizacao do pagamento no Access', error)));
   }
 
   excluirNotaFiscal(id: string): Observable<void> {

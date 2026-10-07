@@ -15,6 +15,12 @@ export const NOTAS_FISCAIS_API_URL = new InjectionToken<string>('NOTAS_FISCAIS_A
   factory: () => inject(MICROLED_RUNTIME_CONFIG).notasFiscaisApiUrl,
 });
 
+/** Derivado da URL de notas fiscais: mesma API principal, recurso /api/v1/tomadores. */
+export const TOMADORES_API_URL = new InjectionToken<string>('TOMADORES_API_URL', {
+  factory: () =>
+    inject(MICROLED_RUNTIME_CONFIG).notasFiscaisApiUrl.replace(/\/notas-fiscais\/?$/, '/tomadores'),
+});
+
 export const CERTIFICATES_API_URL = new InjectionToken<string>('CERTIFICATES_API_URL', {
   factory: () => localAgentUrl('/api/local/certificates'),
 });
@@ -50,6 +56,31 @@ export const LOCAL_ACCESS_PENDING_RPS_API_URL = new InjectionToken<string>(
   'LOCAL_ACCESS_PENDING_RPS_API_URL',
   {
     factory: () => localAgentUrl('/api/local/access/pending-rps'),
+  },
+);
+
+export const LOCAL_ACCESS_NF_API_URL = new InjectionToken<string>('LOCAL_ACCESS_NF_API_URL', {
+  factory: () => localAgentUrl('/api/local/access/nf'),
+});
+
+export const LOCAL_ACCESS_PENDING_RPS_COUNT_API_URL = new InjectionToken<string>(
+  'LOCAL_ACCESS_PENDING_RPS_COUNT_API_URL',
+  {
+    factory: () => localAgentUrl('/api/local/access/pending-rps/count'),
+  },
+);
+
+export const LOCAL_RPS_QUEUE_PENDING_API_URL = new InjectionToken<string>(
+  'LOCAL_RPS_QUEUE_PENDING_API_URL',
+  {
+    factory: () => localAgentUrl('/api/local/rps/queue-pending'),
+  },
+);
+
+export const LOCAL_RPS_PROCESS_QUEUED_API_URL = new InjectionToken<string>(
+  'LOCAL_RPS_PROCESS_QUEUED_API_URL',
+  {
+    factory: () => localAgentUrl('/api/local/rps/process-queued'),
   },
 );
 
