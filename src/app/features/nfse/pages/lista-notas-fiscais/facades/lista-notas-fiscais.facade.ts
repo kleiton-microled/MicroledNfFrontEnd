@@ -25,6 +25,7 @@ export class ListaNotasFiscaisFacade {
   private readonly _processPendingMessage = signal<string | null>(null);
   /** Erros do ultimo envio feito nesta tela, por id da nota (inclui falhas de comunicacao). */
   private readonly _sendErrors = signal<Record<string, NotaFiscalEventoItem[]>>({});
+  private readonly _sendingId = signal<string | null>(null);
   private _lastFilter: NotaFiscalFilter = {};
 
   readonly items = this._items.asReadonly();
@@ -37,6 +38,7 @@ export class ListaNotasFiscaisFacade {
   readonly isProcessingPending = this._isProcessingPending.asReadonly();
   readonly processPendingMessage = this._processPendingMessage.asReadonly();
   readonly sendErrors = this._sendErrors.asReadonly();
+  readonly sendingId = this._sendingId.asReadonly();
 
   readonly hasItems = computed(() => this._items().length > 0);
   readonly isEmpty = computed(() => !this._isLoading() && !this._errorMessage() && this._items().length === 0);
@@ -108,24 +110,10 @@ export class ListaNotasFiscaisFacade {
       }
 
       for (const nota of pending) {
-        try {
-          const response = await firstValueFrom(this.nfseApiService.processarRpsEnfileirado(nota.id));
-          if (response.success) {
-            sent += 1;
-            this.setSendErrors(nota.id, []);
-          } else {
-            failed += 1;
-            this.setSendErrors(nota.id, this.mapResponseErrors(response));
-          }
-        } catch (error: unknown) {
+        if (await this.sendNota(nota.id)) {
+          sent += 1;
+        } else {
           failed += 1;
-          this.setSendErrors(nota.id, [
-            {
-              codigo: error instanceof NfseApiError && error.status ? String(error.status) : '-',
-              descricao:
-                error instanceof NfseApiError ? error.message : 'Falha de comunicacao no envio da nota.',
-            },
-          ]);
         }
       }
 
@@ -135,6 +123,43 @@ export class ListaNotasFiscaisFacade {
       this.loadPage(this._lastFilter);
     } finally {
       this._isProcessingPending.set(false);
+    }
+  }
+
+  /** Envia a prefeitura uma unica nota "A processar" (acao "Enviar Nota" da lista). */
+  async processOne(notaId: string): Promise<void> {
+    if (this._sendingId() || this._isProcessingPending()) {
+      return;
+    }
+
+    this._sendingId.set(notaId);
+    this._processPendingMessage.set(null);
+    try {
+      const ok = await this.sendNota(notaId);
+      this._processPendingMessage.set(
+        ok ? 'Nota enviada a prefeitura.' : 'A prefeitura retornou erros no envio da nota (veja abaixo da linha).',
+      );
+      this.loadPage(this._lastFilter);
+    } finally {
+      this._sendingId.set(null);
+    }
+  }
+
+  /** Envia o RPS enfileirado e guarda os erros da prefeitura para exibir abaixo da linha. */
+  private async sendNota(notaId: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(this.nfseApiService.processarRpsEnfileirado(notaId));
+      this.setSendErrors(notaId, response.success ? [] : this.mapResponseErrors(response));
+      return response.success;
+    } catch (error: unknown) {
+      this.setSendErrors(notaId, [
+        {
+          codigo: error instanceof NfseApiError && error.status ? String(error.status) : '-',
+          descricao:
+            error instanceof NfseApiError ? error.message : 'Falha de comunicacao no envio da nota.',
+        },
+      ]);
+      return false;
     }
   }
 

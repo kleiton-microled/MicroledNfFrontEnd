@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,21 @@ import { NfseApiService } from '../../data-access/services/nfse-api.service';
 import { NfseApiError, NotaFiscalEventoItem, NotaFiscalItemResponse, NotaFiscalResponse, ConsultarStatusRpsResponse } from '../../data-access/models/nfse-api.models';
 import { ReenvioNotaState } from './models/reenvio-nota-state';
 import { DuplicarNotaState } from './models/duplicar-nota-state';
+
+type NotaAcao = 'consultar' | 'pdf' | 'enviar' | 'pagamento' | 'editar' | 'duplicar' | 'excluir';
+
+interface NotaAcaoOpcao {
+  acao: NotaAcao;
+  label: string;
+  icon: string;
+  danger?: boolean;
+}
+
+interface AcoesMenuState {
+  item: NotaFiscalItemResponse;
+  top: number;
+  right: number;
+}
 
 interface ModalDraft {
   pago: boolean;
@@ -32,6 +47,8 @@ export class ListaNotasFiscaisComponent implements OnInit {
   @ViewChild('editDialog') private editDialog!: ElementRef<HTMLDialogElement>;
 
   protected readonly expandedId = signal<string | null>(null);
+  /** Menu "Acoes" aberto (posicao fixa na tela: a tabela tem overflow e cortaria um menu absoluto). */
+  protected readonly acoesMenu = signal<AcoesMenuState | null>(null);
   protected readonly consultandoProtocoloId = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
   protected readonly duplicandoId = signal<string | null>(null);
@@ -153,6 +170,105 @@ export class ListaNotasFiscaisComponent implements OnInit {
           alert('Pagamento salvo no sistema, mas nao foi possivel atualizar a tabela NF do Access: ' + message);
         },
       });
+  }
+
+  protected toggleAcoesMenu(item: NotaFiscalItemResponse, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.acoesMenu()?.item.id === item.id) {
+      this.acoesMenu.set(null);
+      return;
+    }
+
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.acoesMenu.set({
+      item,
+      top: rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+    });
+  }
+
+  @HostListener('document:click')
+  @HostListener('window:resize')
+  @HostListener('window:scroll')
+  protected closeAcoesMenu(): void {
+    if (this.acoesMenu()) {
+      this.acoesMenu.set(null);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.closeAcoesMenu();
+  }
+
+  /** Opcoes do menu "Acoes" conforme a situacao da nota. */
+  protected getAcoes(item: NotaFiscalItemResponse): NotaAcaoOpcao[] {
+    const status = item.status?.toLowerCase();
+    const autorizada = this.isAuthorized(item.status);
+    const aProcessar = status === 'pending' || status === 'generated';
+    const comFalha = status === 'rejected' || status === 'error';
+    const opcoes: NotaAcaoOpcao[] = [];
+
+    if (item.protocolo) {
+      opcoes.push({ acao: 'consultar', label: 'Consultar nota na prefeitura', icon: 'bi-search' });
+    }
+    if (item.numeroNota && item.inscricaoPrestador) {
+      opcoes.push({ acao: 'pdf', label: 'Ver PDF', icon: 'bi-file-earmark-pdf' });
+    }
+    if (aProcessar) {
+      opcoes.push({ acao: 'enviar', label: 'Enviar nota', icon: 'bi-send' });
+    }
+    if (autorizada) {
+      opcoes.push({ acao: 'pagamento', label: 'Informar pagamento', icon: 'bi-cash-coin' });
+    }
+    if (comFalha) {
+      opcoes.push({ acao: 'editar', label: 'Editar nota', icon: 'bi-pencil' });
+    }
+    if (autorizada) {
+      opcoes.push({ acao: 'duplicar', label: 'Duplicar nota', icon: 'bi-files' });
+    }
+    // "Ainda nao enviada": sem protocolo da prefeitura e nao autorizada.
+    if (!item.protocolo && !autorizada) {
+      opcoes.push({ acao: 'excluir', label: 'Excluir nota', icon: 'bi-trash', danger: true });
+    }
+
+    return opcoes;
+  }
+
+  protected isAcaoEmAndamento(item: NotaFiscalItemResponse): boolean {
+    return (
+      this.consultandoProtocoloId() === item.id ||
+      this.deletingId() === item.id ||
+      this.duplicandoId() === item.id ||
+      this.facade.sendingId() === item.id
+    );
+  }
+
+  protected executarAcao(acao: NotaAcao, item: NotaFiscalItemResponse): void {
+    this.acoesMenu.set(null);
+    switch (acao) {
+      case 'consultar':
+        this.consultarProtocolo(item);
+        break;
+      case 'pdf':
+        this.abrirPdfPrefeitura(item);
+        break;
+      case 'enviar':
+        void this.facade.processOne(item.id);
+        break;
+      case 'pagamento':
+        this.openEditModal(item);
+        break;
+      case 'editar':
+        this.reenviarNota(item);
+        break;
+      case 'duplicar':
+        this.duplicarNota(item);
+        break;
+      case 'excluir':
+        this.excluirNota(item);
+        break;
+    }
   }
 
   protected getStatusLabel(status: string): string {

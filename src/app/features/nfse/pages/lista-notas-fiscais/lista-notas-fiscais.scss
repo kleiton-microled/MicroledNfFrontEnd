@@ -266,3 +266,16 @@
   border-top: 1px solid var(--tm-border);
   background: var(--tm-muted);
 }
+
+.nf-acoes-btn {
+  white-space: nowrap;
+}
+
+/* Fixo na viewport: a .table-responsive tem overflow e cortaria um dropdown absoluto. */
+.nf-acoes-menu {
+  position: fixed;
+  left: auto;
+  z-index: 1060;
+  min-width: 240px;
+  margin: 0;
+}
